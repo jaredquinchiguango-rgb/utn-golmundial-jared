@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">Fases</ui:define>
+    <ui:define name="cabecera">Cat&#225;logo del torneo</ui:define>
+
+    <ui:define name="contenido">
+        <div class="subtabs">
+            <h:link outcome="/selecciones/lista" styleClass="subtab" value="Selecciones"/>
+            <h:link outcome="/grupos/lista"       styleClass="subtab" value="Grupos"/>
+            <h:link outcome="/sedes/lista"        styleClass="subtab" value="Sedes"/>
+            <h:link outcome="/fases/lista"        styleClass="subtab subtab-active" value="Fases"/>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Fases del torneo (RF09)</div>
+            <div class="card-body">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Codigo</th><th>Nombre</th><th>Inicio</th><th>Fin</th></tr>
+                        </thead>
+                        <tbody>
+                            <ui:repeat value="#{faseBean.fases}" var="f">
+                                <tr>
+                                    <td>#{f.codigo}</td>
+                                    <td>#{f.nombre}</td>
+                                    <td>
+                                        <h:outputText value="#{f.fechaInicio}">
+                                            <f:convertDateTime pattern="dd/MM/yyyy" type="localDate"/>
+                                        </h:outputText>
+                                    </td>
+                                    <td>
+                                        <h:outputText value="#{f.fechaFin}">
+                                            <f:convertDateTime pattern="dd/MM/yyyy" type="localDate"/>
+                                        </h:outputText>
+                                    </td>
+                                </tr>
+                            </ui:repeat>
+                            <ui:fragment rendered="#{empty faseBean.fases}">
+                                <tr><td colspan="4" class="text-center text-muted">No hay fases registradas.</td></tr>
+                            </ui:fragment>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">GolMundial 2026 - Panel Administrativo</ui:define>
+    <ui:define name="eyebrow">Panel administrativo</ui:define>
+    <ui:define name="cabecera">Inicio</ui:define>
+
+    <ui:define name="contenido">
+        <div class="index-hero">
+            <span class="eyebrow">Mundial 2026 &#183; Estados Unidos, M&#233;xico y Canad&#225;</span>
+            <h2>Mesa de control del torneo</h2>
+            <p>Gestiona partidos, cuentas y revisa la actividad de UTNGolCoin.</p>
+        </div>
+
+        <div class="accesos-grid">
+            <div class="acceso-card">
+                <div class="icono">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="7" cy="12" r="4"/><circle cx="17" cy="12" r="4"/><line x1="11" y1="12" x2="13" y2="12"/>
+                    </svg>
+                </div>
+                <h3>Partidos</h3>
+                <p>Gestionar el calendario y registrar resultados oficiales</p>
+                <h:link outcome="/partidos/lista" styleClass="btn btn-primary">Ir a partidos</h:link>
+            </div>
+            <div class="acceso-card">
+                <div class="icono">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.8 3.1-6.5 7-6.5s7 2.7 7 6.5"/>
+                    </svg>
+                </div>
+                <h3>Usuarios</h3>
+                <p>Administrar cuentas registradas en la plataforma</p>
+                <h:link outcome="/usuarios/lista" styleClass="btn btn-primary">Ir a usuarios</h:link>
+            </div>
+            <div class="acceso-card">
+                <div class="icono">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="4" y1="21" x2="4" y2="12"/><line x1="12" y1="21" x2="12" y2="7"/><line x1="20" y1="21" x2="20" y2="15"/>
+                    </svg>
+                </div>
+                <h3>Reportes</h3>
+                <p>UTNGolCoin en circulaci&#243;n y partidos m&#225;s predichos</p>
+                <h:link outcome="/reportes/lista" styleClass="btn btn-primary">Ver reportes</h:link>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>
+</html>

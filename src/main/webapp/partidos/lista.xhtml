@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">Partidos</ui:define>
+    <ui:define name="eyebrow">Torneo</ui:define>
+    <ui:define name="cabecera">Partidos</ui:define>
+
+    <ui:define name="contenido">
+        <div class="card">
+            <div class="card-header">Calendario del torneo</div>
+            <div class="card-body">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Local</th>
+                                <th>Visitante</th>
+                                <th>Fecha/Hora UTC</th>
+                                <th>Sede</th>
+                                <th>Fase</th>
+                                <th>Estado</th>
+                                <th>Marcador</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <ui:repeat value="#{partidoBean.partidos}" var="p">
+                                <tr>
+                                    <td>#{p.numeroPartidoFifa}</td>
+                                    <td>#{p.nombreSeleccionLocal}</td>
+                                    <td>#{p.nombreSeleccionVisitante}</td>
+                                    <td>
+                                        <h:outputText value="#{p.fechaHoraUtc}">
+                                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                        </h:outputText>
+                                    </td>
+                                    <td>#{p.nombreSede}</td>
+                                    <td>#{p.nombreFase}</td>
+                                    <td>
+                                        <h:panelGroup rendered="#{p.estado eq 'programado'}">
+                                            <span class="badge-tag badge-gold">Programado</span>
+                                        </h:panelGroup>
+                                        <h:panelGroup rendered="#{p.estado eq 'en_juego'}">
+                                            <span class="badge-tag badge-pitch"><span class="live-dot"/> En juego</span>
+                                        </h:panelGroup>
+                                        <h:panelGroup rendered="#{p.estado eq 'finalizado'}">
+                                            <span class="badge-tag badge-neutral">Finalizado</span>
+                                        </h:panelGroup>
+                                        <h:panelGroup rendered="#{p.estado ne 'programado' and p.estado ne 'en_juego' and p.estado ne 'finalizado'}">
+                                            <span class="badge-tag badge-neutral">#{p.estado}</span>
+                                        </h:panelGroup>
+                                    </td>
+                                    <td><span class="score">#{p.golesLocal} - #{p.golesVisitante}</span></td>
+                                    <td>
+                                        <h:form style="display:inline">
+                                            <h:commandButton value="Editar"
+                                                             styleClass="btn btn-warning btn-sm"
+                                                             action="#{partidoBean.prepararEditar(p)}"/>
+                                        </h:form>
+                                        <h:form style="display:inline">
+                                            <h:commandButton value="Registrar resultado"
+                                                             styleClass="btn btn-success btn-sm"
+                                                             action="#{partidoBean.prepararResultado(p)}"/>
+                                        </h:form>
+                                    </td>
+                                </tr>
+                            </ui:repeat>
+                            <ui:fragment rendered="#{empty partidoBean.partidos}">
+                                <tr>
+                                    <td colspan="9" class="text-center text-muted">
+                                        No hay partidos registrados.
+                                    </td>
+                                </tr>
+                            </ui:fragment>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>
+</html>

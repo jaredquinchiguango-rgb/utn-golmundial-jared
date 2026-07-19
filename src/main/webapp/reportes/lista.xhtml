@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">Reportes</ui:define>
+    <ui:define name="cabecera">Reportes b&#225;sicos</ui:define>
+
+    <ui:define name="acciones">
+        <h:form>
+            <h:commandButton value="Actualizar" styleClass="btn btn-outline"
+                             action="#{reportesBean.recargar()}"/>
+        </h:form>
+    </ui:define>
+
+    <ui:define name="contenido">
+
+        <div class="reportes-grid">
+            <div class="card kpi-card">
+                <div class="card-body text-center">
+                    <div class="kpi-label">Total UTNGolCoin en circulacion</div>
+                    <div class="kpi-value">
+                        <h:outputText value="#{reportesBean.totalCirculante}">
+                            <f:convertNumber type="currency" currencySymbol="&#8383; " maxFractionDigits="2"/>
+                        </h:outputText>
+                    </div>
+                    <div class="text-muted">Suma del saldo de todas las billeteras activas</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">Top 10 partidos con m&#225;s predicciones</div>
+            <div class="card-body">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Partido</th>
+                                <th>Cantidad de predicciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <ui:repeat value="#{reportesBean.topPartidosConMasPredicciones}"
+                                       var="item" varStatus="status">
+                                <tr>
+                                    <td>#{status.index + 1}</td>
+                                    <td>#{item.nombrePartido}</td>
+                                    <td>
+                                        <span class="badge badge-info">#{item.cantidad}</span>
+                                    </td>
+                                </tr>
+                            </ui:repeat>
+                            <ui:fragment rendered="#{empty reportesBean.topPartidosConMasPredicciones}">
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted">
+                                        Aun no hay predicciones registradas.
+                                    </td>
+                                </tr>
+                            </ui:fragment>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </ui:define>
+
+</ui:composition>
+</html>

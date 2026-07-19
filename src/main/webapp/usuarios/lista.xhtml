@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">Usuarios</ui:define>
+    <ui:define name="cabecera">Gestion de usuarios</ui:define>
+
+    <ui:define name="contenido">
+        <div class="card">
+            <div class="card-header">Cuentas registradas</div>
+            <div class="card-body">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Username</th>
+                                <th>Rol</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <ui:repeat value="#{usuarioBean.usuarios}" var="u">
+                                <tr>
+                                    <td>#{u.idUsuario}</td>
+                                    <td>#{u.nombre}</td>
+                                    <td>#{u.email}</td>
+                                    <td>#{u.username}</td>
+                                    <td>#{u.nombreRol}</td>
+                                    <td>
+                                        <h:panelGroup rendered="#{u.estado}">
+                                            <span class="badge badge-success">Activo</span>
+                                        </h:panelGroup>
+                                        <h:panelGroup rendered="#{not u.estado}">
+                                            <span class="badge badge-danger">Inactivo</span>
+                                        </h:panelGroup>
+                                    </td>
+                                    <td>
+                                        <h:form style="display:inline">
+                                            <h:commandButton value="#{u.estado ? 'Deshabilitar' : 'Habilitar'}"
+                                                             styleClass="btn btn-sm #{u.estado ? 'btn-danger' : 'btn-success'}"
+                                                             action="#{usuarioBean.cambiarEstado(u)}"/>
+                                        </h:form>
+                                    </td>
+                                </tr>
+                            </ui:repeat>
+                            <ui:fragment rendered="#{empty usuarioBean.usuarios}">
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">
+                                        No hay usuarios registrados.
+                                    </td>
+                                </tr>
+                            </ui:fragment>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>
+</html>

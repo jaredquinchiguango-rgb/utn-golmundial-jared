@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">Editar seleccion</ui:define>
+    <ui:define name="cabecera">Editar seleccion</ui:define>
+
+    <ui:define name="contenido">
+        <div class="card" style="max-width:520px;margin:0 auto;">
+            <div class="card-header">#{seleccionBean.seleccionSeleccionada.nombre}</div>
+            <div class="card-body">
+                <h:form id="formSeleccion">
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <h:outputLabel for="nombre" value="Nombre *"/>
+                            <h:inputText id="nombre"
+                                         value="#{seleccionBean.seleccionSeleccionada.nombre}"
+                                         required="true"
+                                         requiredMessage="El nombre es obligatorio."/>
+                            <h:message for="nombre" styleClass="msg-error"/>
+                        </div>
+                        <div class="form-group">
+                            <h:outputLabel for="codigoFifa" value="Codigo FIFA *"/>
+                            <h:inputText id="codigoFifa"
+                                         value="#{seleccionBean.seleccionSeleccionada.codigoFifa}"
+                                         required="true"
+                                         requiredMessage="El codigo FIFA es obligatorio."/>
+                            <h:message for="codigoFifa" styleClass="msg-error"/>
+                        </div>
+                        <div class="form-group">
+                            <h:outputLabel for="grupo" value="Grupo"/>
+                            <h:selectOneMenu id="grupo"
+                                             value="#{seleccionBean.seleccionSeleccionada.idGrupo}">
+                                <f:selectItem itemLabel="-- Seleccione --" itemValue="#{null}"/>
+                                <f:selectItems value="#{seleccionBean.grupos}"
+                                               var="g"
+                                               itemValue="#{g.idGrupo}"
+                                               itemLabel="#{g.nombre}"/>
+                            </h:selectOneMenu>
+                        </div>
+                        <div class="form-group">
+                            <h:outputLabel for="anfitrion" value="Es sede anfitriona"/>
+                            <h:selectBooleanCheckbox id="anfitrion"
+                                value="#{seleccionBean.seleccionSeleccionada.esAnfitrion}"/>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <h:commandButton value="Cancelar"
+                                         styleClass="btn btn-outline"
+                                         action="#{seleccionBean.cancelar()}"
+                                         immediate="true"/>
+                        <h:commandButton value="Guardar cambios"
+                                         styleClass="btn btn-primary"
+                                         action="#{seleccionBean.guardarEdicion()}"/>
+                    </div>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>
+</html>

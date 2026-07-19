@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">Selecciones</ui:define>
+    <ui:define name="cabecera">Cat&#225;logo del torneo</ui:define>
+
+    <ui:define name="contenido">
+        <div class="subtabs">
+            <h:link outcome="/selecciones/lista" styleClass="subtab subtab-active" value="Selecciones"/>
+            <h:link outcome="/grupos/lista"       styleClass="subtab" value="Grupos"/>
+            <h:link outcome="/sedes/lista"        styleClass="subtab" value="Sedes"/>
+            <h:link outcome="/fases/lista"        styleClass="subtab" value="Fases"/>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Las 48 selecciones participantes</div>
+            <div class="card-body">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Codigo FIFA</th>
+                                <th>Grupo</th>
+                                <th>Anfitrion</th>
+                                <th>PJ</th>
+                                <th>Pts</th>
+                                <th>G</th>
+                                <th>E</th>
+                                <th>P</th>
+                                <th>GF</th>
+                                <th>GC</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <ui:repeat value="#{seleccionBean.selecciones}" var="s">
+                                <tr>
+                                    <td>#{s.nombre}</td>
+                                    <td>#{s.codigoFifa}</td>
+                                    <td>#{s.nombreGrupo}</td>
+                                    <td>
+                                        <h:panelGroup rendered="#{s.esAnfitrion}">
+                                            <span class="badge badge-info">Si</span>
+                                        </h:panelGroup>
+                                    </td>
+                                    <td>#{s.partidosJugados}</td>
+                                    <td>#{s.puntos}</td>
+                                    <td>#{s.partidosGanados}</td>
+                                    <td>#{s.partidosEmpatados}</td>
+                                    <td>#{s.partidosPerdidos}</td>
+                                    <td>#{s.golesFavor}</td>
+                                    <td>#{s.golesContra}</td>
+                                    <td>
+                                        <h:form style="display:inline">
+                                            <h:commandButton value="Editar"
+                                                             styleClass="btn btn-warning btn-sm"
+                                                             action="#{seleccionBean.prepararEditar(s)}"/>
+                                        </h:form>
+                                    </td>
+                                </tr>
+                            </ui:repeat>
+                            <ui:fragment rendered="#{empty seleccionBean.selecciones}">
+                                <tr>
+                                    <td colspan="12" class="text-center text-muted">
+                                        No hay selecciones registradas.
+                                    </td>
+                                </tr>
+                            </ui:fragment>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-muted mt-2">
+                    PJ: partidos jugados · Pts: puntos · G/E/P: ganados/empatados/perdidos ·
+                    GF/GC: goles a favor/en contra. Estas columnas las actualiza el sistema
+                    automaticamente al registrar resultados (RF06), no se editan a mano.
+                </p>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>
+</html>

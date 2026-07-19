@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">Iniciar sesion - Panel Administrativo</ui:define>
+
+    <ui:define name="contenido">
+        <div class="login-wrap">
+            <div class="card login-card">
+                <div class="card-header">Acceso administrador</div>
+                <div class="card-body">
+                    <h:form id="formLogin">
+                        <div class="form-grid" style="grid-template-columns:1fr;">
+                            <div class="form-group">
+                                <h:outputLabel for="correo" value="Correo *"/>
+                                <h:inputText id="correo"
+                                             value="#{loginBean.correo}"
+                                             required="true"
+                                             requiredMessage="El correo es obligatorio."/>
+                                <h:message for="correo" styleClass="msg-error"/>
+                            </div>
+                            <div class="form-group">
+                                <h:outputLabel for="clave" value="Clave *"/>
+                                <h:inputSecret id="clave"
+                                               value="#{loginBean.clave}"
+                                               required="true"
+                                               requiredMessage="La clave es obligatoria."
+                                               redisplay="true"/>
+                                <h:message for="clave" styleClass="msg-error"/>
+                            </div>
+                        </div>
+                        <div class="form-actions" style="justify-content:center;">
+                            <h:commandButton value="Ingresar"
+                                             styleClass="btn btn-primary"
+                                             action="#{loginBean.ingresar()}"/>
+                        </div>
+                    </h:form>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">Grupos</ui:define>
+    <ui:define name="cabecera">Cat&#225;logo del torneo</ui:define>
+
+    <ui:define name="contenido">
+        <div class="subtabs">
+            <h:link outcome="/selecciones/lista" styleClass="subtab" value="Selecciones"/>
+            <h:link outcome="/grupos/lista"       styleClass="subtab subtab-active" value="Grupos"/>
+            <h:link outcome="/sedes/lista"        styleClass="subtab" value="Sedes"/>
+            <h:link outcome="/fases/lista"        styleClass="subtab" value="Fases"/>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Los 12 grupos del torneo</div>
+            <div class="card-body">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Codigo</th><th>Nombre</th></tr>
+                        </thead>
+                        <tbody>
+                            <ui:repeat value="#{grupoBean.grupos}" var="g">
+                                <tr>
+                                    <td>#{g.codigo}</td>
+                                    <td>#{g.nombre}</td>
+                                </tr>
+                            </ui:repeat>
+                            <ui:fragment rendered="#{empty grupoBean.grupos}">
+                                <tr><td colspan="2" class="text-center text-muted">No hay grupos registrados.</td></tr>
+                            </ui:fragment>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-muted mt-2">
+                    Los grupos se cargan desde el seed inicial del torneo (RF28); esta vista es
+                    solo de consulta.
+                </p>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">Registrar resultado</ui:define>
+    <ui:define name="cabecera">Registrar resultado oficial</ui:define>
+
+    <ui:define name="contenido">
+        <div class="card" style="max-width:480px;margin:0 auto;">
+            <div class="card-header">
+                #{partidoBean.partidoSeleccionado.nombreSeleccionLocal} vs
+                #{partidoBean.partidoSeleccionado.nombreSeleccionVisitante}
+            </div>
+            <div class="card-body">
+                <h:form id="formResultado">
+                    <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+                        <div class="form-group">
+                            <h:outputLabel for="golesLocal"
+                                value="Goles #{partidoBean.partidoSeleccionado.nombreSeleccionLocal} *"/>
+                            <h:inputText id="golesLocal"
+                                         value="#{partidoBean.golesLocalForm}"
+                                         required="true"
+                                         requiredMessage="Ingrese los goles del local.">
+                                <f:convertNumber integerOnly="true"/>
+                            </h:inputText>
+                            <h:message for="golesLocal" styleClass="msg-error"/>
+                        </div>
+                        <div class="form-group">
+                            <h:outputLabel for="golesVisitante"
+                                value="Goles #{partidoBean.partidoSeleccionado.nombreSeleccionVisitante} *"/>
+                            <h:inputText id="golesVisitante"
+                                         value="#{partidoBean.golesVisitanteForm}"
+                                         required="true"
+                                         requiredMessage="Ingrese los goles del visitante.">
+                                <f:convertNumber integerOnly="true"/>
+                            </h:inputText>
+                            <h:message for="golesVisitante" styleClass="msg-error"/>
+                        </div>
+                    </div>
+                    <p class="text-muted mt-2">
+                        Al confirmar, se notifica automaticamente al Servicio UTNGolCoin
+                        para liquidar las predicciones de este partido.
+                    </p>
+                    <div class="form-actions">
+                        <h:commandButton value="Cancelar"
+                                         styleClass="btn btn-outline"
+                                         action="#{partidoBean.cancelar()}"
+                                         immediate="true"/>
+                        <h:commandButton value="Confirmar resultado"
+                                         styleClass="btn btn-success"
+                                         action="#{partidoBean.guardarResultado()}"
+                                         onclick="return confirm('Confirmar el resultado? Esta accion liquida las predicciones.')"/>
+                    </div>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>
+</html>
