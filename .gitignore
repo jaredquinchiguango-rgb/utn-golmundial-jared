@@ -32,3 +32,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Scripts de scaffolding (uso local, no van al repo)
+setup-frontend-admin*.sh
