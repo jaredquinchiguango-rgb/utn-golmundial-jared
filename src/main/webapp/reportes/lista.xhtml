@@ -7,6 +7,7 @@
 <ui:composition template="/WEB-INF/templates/layout.xhtml">
 
     <ui:define name="titulo">Reportes</ui:define>
+    <ui:define name="eyebrow">Anal&#237;tica</ui:define>
     <ui:define name="cabecera">Reportes b&#225;sicos</ui:define>
 
     <ui:define name="acciones">
@@ -27,7 +28,7 @@
                             <f:convertNumber type="currency" currencySymbol="&#8383; " maxFractionDigits="2"/>
                         </h:outputText>
                     </div>
-                    <div class="text-muted">Suma del saldo de todas las billeteras activas</div>
+                    <div class="text-muted">Segun /api/Wallets/total-circulation</div>
                 </div>
             </div>
         </div>
@@ -42,6 +43,7 @@
                                 <th>#</th>
                                 <th>Partido</th>
                                 <th>Cantidad de predicciones</th>
+                                <th>Monto apostado</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -50,14 +52,19 @@
                                 <tr>
                                     <td>#{status.index + 1}</td>
                                     <td>#{item.nombrePartido}</td>
+                                    <td><span class="badge-tag badge-pitch">#{item.cantidad}</span></td>
                                     <td>
-                                        <span class="badge badge-info">#{item.cantidad}</span>
+                                        <span class="score">
+                                            <h:outputText value="#{item.montoTotal}">
+                                                <f:convertNumber type="currency" currencySymbol="&#8383; " maxFractionDigits="2"/>
+                                            </h:outputText>
+                                        </span>
                                     </td>
                                 </tr>
                             </ui:repeat>
                             <ui:fragment rendered="#{empty reportesBean.topPartidosConMasPredicciones}">
                                 <tr>
-                                    <td colspan="3" class="text-center text-muted">
+                                    <td colspan="4" class="text-center text-muted">
                                         Aun no hay predicciones registradas.
                                     </td>
                                 </tr>

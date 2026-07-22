@@ -1,28 +1,17 @@
 package ec.edu.utn.golmundial.util;
 
-/**
- * URLs base de las dos APIs REST que consume este frontend administrativo.
- *
- * IMPORTANTE:
- * - Mientras desarrollan en local, apunten a localhost con el puerto real
- *   donde cada backend está corriendo en SU maquina (Ariel / Puma).
- * - Cuando desplieguen en Render, reemplacen estos valores por las URLs
- *   publicas (https://xxxx.onrender.com/api).
- * - Idealmente esto se saca a una variable de entorno o a un
- *   resources/config.properties para no tener que recompilar cada vez
- *   que cambie la URL. Lo dejamos simple por ahora; lo mejoramos despues.
- */
 public class ApiConfig {
 
-    // Backend de Ariel: Jakarta EE - selecciones, grupos, sedes, partidos,
-    // fases, usuarios, roles, auditoria.
+    // Backend de Ariel (Jakarta EE) - confirmado
     public static final String BASE_URL_ESTADISTICAS =
-            "http://localhost:8080/api-estadisticas/api";
+                    "http://localhost:8080/estadisticas-backend/api";
+    //       "http://192.168.51.131:8080/estadisticas-backend/api";
 
-    // Backend de Puma: .NET - billeteras, transacciones, predicciones,
-    // bono diario, configuracion del sistema.
+    // Backend de Puma (.NET) - confirmado. Se usa HTTP (no HTTPS) para
+    // evitar problemas de certificado autofirmado en desarrollo local.
+    // Cuando este en Render, cambiar por la URL publica (siempre https).
     public static final String BASE_URL_UTNCOIN =
-            "http://localhost:5000/api";
+            "http://192.168.51.41:57781/api";
 
     private ApiConfig() {}
 }

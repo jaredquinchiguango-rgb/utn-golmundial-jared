@@ -7,6 +7,7 @@
 <ui:composition template="/WEB-INF/templates/layout.xhtml">
 
     <ui:define name="titulo">Editar seleccion</ui:define>
+    <ui:define name="eyebrow">Torneo</ui:define>
     <ui:define name="cabecera">Editar seleccion</ui:define>
 
     <ui:define name="contenido">
@@ -34,7 +35,7 @@
                         <div class="form-group">
                             <h:outputLabel for="grupo" value="Grupo"/>
                             <h:selectOneMenu id="grupo"
-                                             value="#{seleccionBean.seleccionSeleccionada.idGrupo}">
+                                             value="#{seleccionBean.idGrupoSeleccionado}">
                                 <f:selectItem itemLabel="-- Seleccione --" itemValue="#{null}"/>
                                 <f:selectItems value="#{seleccionBean.grupos}"
                                                var="g"
@@ -48,6 +49,10 @@
                                 value="#{seleccionBean.seleccionSeleccionada.esAnfitrion}"/>
                         </div>
                     </div>
+                    <p class="text-muted mt-2">
+                        El campo de confederaci&#243;n no se puede editar todav&#237;a: el
+                        backend no expone su id en ningun endpoint (pendiente con Ariel).
+                    </p>
                     <div class="form-actions">
                         <h:commandButton value="Cancelar"
                                          styleClass="btn btn-outline"

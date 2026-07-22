@@ -16,6 +16,7 @@ import java.util.List;
 public class UsuarioBean implements Serializable {
 
     @Inject private UsuarioService usuarioService;
+    @Inject private LoginBean      loginBean; // para reenviar credenciales del admin (Basic Auth)
 
     private List<UsuarioDTO> usuarios;
 
@@ -25,12 +26,15 @@ public class UsuarioBean implements Serializable {
     }
 
     public void cargarUsuarios() {
-        usuarios = usuarioService.listarTodos();
+        usuarios = usuarioService.listarTodos(loginBean.getCorreo(), loginBean.getClave());
     }
 
     public void cambiarEstado(UsuarioDTO usuario) {
         boolean nuevoEstado = !Boolean.TRUE.equals(usuario.getEstado());
-        if (usuarioService.cambiarEstado(usuario.getIdUsuario(), nuevoEstado)) {
+        boolean exito = usuarioService.cambiarEstado(
+                usuario.getIdUsuario(), nuevoEstado, loginBean.getCorreo(), loginBean.getClave());
+
+        if (exito) {
             cargarUsuarios();
             msg(FacesMessage.SEVERITY_INFO, "Estado del usuario actualizado.");
         } else {

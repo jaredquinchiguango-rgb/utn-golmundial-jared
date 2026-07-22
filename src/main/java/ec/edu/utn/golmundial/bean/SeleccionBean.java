@@ -19,10 +19,12 @@ public class SeleccionBean implements Serializable {
 
     @Inject private SeleccionService seleccionService;
     @Inject private GrupoService     grupoService;
+    @Inject private LoginBean        loginBean; // para reenviar credenciales (Basic Auth)
 
     private List<SeleccionDTO> selecciones;
     private List<GrupoDTO>     grupos;
     private SeleccionDTO       seleccionSeleccionada;
+    private Integer            idGrupoSeleccionado;
 
     @PostConstruct
     public void init() {
@@ -36,11 +38,23 @@ public class SeleccionBean implements Serializable {
 
     public String prepararEditar(SeleccionDTO seleccion) {
         seleccionSeleccionada = seleccion;
+        idGrupoSeleccionado = resolverIdGrupoPorNombre(seleccion.getNombreGrupo());
         return "/selecciones/editar?faces-redirect=true";
     }
 
+    private Integer resolverIdGrupoPorNombre(String nombreGrupo) {
+        if (nombreGrupo == null || grupos == null) return null;
+        return grupos.stream()
+                .filter(g -> nombreGrupo.equals(g.getNombre()))
+                .map(GrupoDTO::getIdGrupo)
+                .findFirst().orElse(null);
+    }
+
     public String guardarEdicion() {
-        boolean exito = seleccionService.actualizar(seleccionSeleccionada);
+        // idConfederacion en null es seguro: el backend de Ariel no toca
+        // ese campo cuando llega null (confirmado en su codigo fuente).
+        boolean exito = seleccionService.actualizar(seleccionSeleccionada, idGrupoSeleccionado, null,
+                loginBean.getCorreo(), loginBean.getClave());
         if (exito) {
             cargarSelecciones();
             msg(FacesMessage.SEVERITY_INFO, "Seleccion actualizada correctamente.");
@@ -64,4 +78,7 @@ public class SeleccionBean implements Serializable {
 
     public SeleccionDTO getSeleccionSeleccionada()               { return seleccionSeleccionada; }
     public void         setSeleccionSeleccionada(SeleccionDTO v) { this.seleccionSeleccionada = v; }
+
+    public Integer getIdGrupoSeleccionado()          { return idGrupoSeleccionado; }
+    public void    setIdGrupoSeleccionado(Integer v) { this.idGrupoSeleccionado = v; }
 }

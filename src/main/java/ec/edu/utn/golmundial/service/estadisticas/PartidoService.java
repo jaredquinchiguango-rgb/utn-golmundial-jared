@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import ec.edu.utn.golmundial.dto.estadisticas.PartidoDTO;
 import ec.edu.utn.golmundial.util.ApiConfig;
+import ec.edu.utn.golmundial.util.BasicAuthUtil;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -14,6 +15,8 @@ import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -38,7 +41,7 @@ public class PartidoService {
         if (client != null) client.close();
     }
 
-    // TODO: confirmar con Ariel el path exacto del endpoint (ej: /partidos)
+    /** GET, lectura abierta para invitados - no necesita Basic Auth. */
     public List<PartidoDTO> listarTodos() {
         try {
             Response response = client
@@ -73,12 +76,21 @@ public class PartidoService {
         }
     }
 
-    public boolean crear(PartidoDTO dto) {
+    /** POST, escritura - EXIGE Basic Auth de administrador. */
+    public boolean crear(Integer fifaMatchNumber, LocalDateTime fechaHoraUtc, String status,
+                          Integer idPhase, Integer idVenue, Integer idGroup,
+                          Integer idHomeTeam, Integer idAwayTeam,
+                          BigDecimal homeOdds, BigDecimal drawOdds, BigDecimal awayOdds,
+                          String emailAdmin, String passwordAdmin) {
         try {
-            String bodyJson = mapper.writeValueAsString(construirBodyCrear(dto));
+            String bodyJson = mapper.writeValueAsString(
+                construirBodyMatchInput(fifaMatchNumber, fechaHoraUtc, status, idPhase, idVenue,
+                        idGroup, idHomeTeam, idAwayTeam, homeOdds, drawOdds, awayOdds));
+
             Response response = client
                 .target(ApiConfig.BASE_URL_ESTADISTICAS + "/partidos")
                 .request(MediaType.APPLICATION_JSON)
+                .header("Authorization", BasicAuthUtil.buildHeader(emailAdmin, passwordAdmin))
                 .post(Entity.json(bodyJson));
 
             return response.getStatus() == 201;
@@ -89,40 +101,43 @@ public class PartidoService {
         }
     }
 
-    public boolean actualizar(PartidoDTO dto) {
+    /** PUT, escritura - EXIGE Basic Auth de administrador. */
+    public boolean actualizar(Integer idPartido, Integer fifaMatchNumber, LocalDateTime fechaHoraUtc,
+                               String status, Integer idPhase, Integer idVenue, Integer idGroup,
+                               Integer idHomeTeam, Integer idAwayTeam,
+                               BigDecimal homeOdds, BigDecimal drawOdds, BigDecimal awayOdds,
+                               String emailAdmin, String passwordAdmin) {
         try {
-            String bodyJson = mapper.writeValueAsString(construirBodyCrear(dto));
+            String bodyJson = mapper.writeValueAsString(
+                construirBodyMatchInput(fifaMatchNumber, fechaHoraUtc, status, idPhase, idVenue,
+                        idGroup, idHomeTeam, idAwayTeam, homeOdds, drawOdds, awayOdds));
+
             Response response = client
-                .target(ApiConfig.BASE_URL_ESTADISTICAS + "/partidos/" + dto.getIdPartido())
+                .target(ApiConfig.BASE_URL_ESTADISTICAS + "/partidos/" + idPartido)
                 .request(MediaType.APPLICATION_JSON)
+                .header("Authorization", BasicAuthUtil.buildHeader(emailAdmin, passwordAdmin))
                 .put(Entity.json(bodyJson));
 
             return response.getStatus() == 200;
 
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Error al actualizar partido id=" + dto.getIdPartido(), e);
+            LOG.log(Level.SEVERE, "Error al actualizar partido id=" + idPartido, e);
             return false;
         }
     }
 
-    /**
-     * Registra el resultado oficial de un partido (RF11). Al hacerlo, el
-     * Servicio de Estadisticas es quien internamente notifica al Servicio
-     * UTNGolCoin para liquidar las predicciones (RF12) - nosotros solo
-     * llamamos a este endpoint, la logica de liquidacion no es nuestra.
-     *
-     * TODO: confirmar con Ariel el path exacto (puede ser PUT /partidos/{id}/resultado
-     * o similar) y el nombre real de los campos del body.
-     */
-    public boolean registrarResultado(Integer idPartido, Integer golesLocal, Integer golesVisitante) {
+    /** PUT /partidos/{id}/resultado (RF11) - EXIGE Basic Auth de administrador. */
+    public boolean registrarResultado(Integer idPartido, Integer golesLocal, Integer golesVisitante,
+                                       String emailAdmin, String passwordAdmin) {
         try {
             ObjectNode body = mapper.createObjectNode();
-            body.put("golesLocal", golesLocal);
-            body.put("golesVisitante", golesVisitante);
+            body.put("homeGoals", golesLocal);
+            body.put("awayGoals", golesVisitante);
 
             Response response = client
                 .target(ApiConfig.BASE_URL_ESTADISTICAS + "/partidos/" + idPartido + "/resultado")
                 .request(MediaType.APPLICATION_JSON)
+                .header("Authorization", BasicAuthUtil.buildHeader(emailAdmin, passwordAdmin))
                 .put(Entity.json(mapper.writeValueAsString(body)));
 
             return response.getStatus() == 200;
@@ -133,14 +148,22 @@ public class PartidoService {
         }
     }
 
-    private ObjectNode construirBodyCrear(PartidoDTO dto) {
+    private ObjectNode construirBodyMatchInput(Integer fifaMatchNumber, LocalDateTime fechaHoraUtc,
+            String status, Integer idPhase, Integer idVenue, Integer idGroup,
+            Integer idHomeTeam, Integer idAwayTeam,
+            BigDecimal homeOdds, BigDecimal drawOdds, BigDecimal awayOdds) {
         ObjectNode body = mapper.createObjectNode();
-        body.put("numeroPartidoFifa", dto.getNumeroPartidoFifa());
-        body.put("idSeleccionLocal", dto.getIdSeleccionLocal());
-        body.put("idSeleccionVisitante", dto.getIdSeleccionVisitante());
-        body.put("idSede", dto.getIdSede());
-        body.put("idFase", dto.getIdFase());
-        body.put("idGrupo", dto.getIdGrupo());
+        body.put("fifaMatchNumber", fifaMatchNumber);
+        body.put("matchDateTimeUtc", fechaHoraUtc != null ? fechaHoraUtc.toString() : null);
+        body.put("status", status);
+        if (idPhase != null) body.put("idPhase", idPhase); else body.putNull("idPhase");
+        if (idVenue != null) body.put("idVenue", idVenue); else body.putNull("idVenue");
+        if (idGroup != null) body.put("idGroup", idGroup); else body.putNull("idGroup");
+        body.put("idHomeTeam", idHomeTeam);
+        body.put("idAwayTeam", idAwayTeam);
+        if (homeOdds != null) body.put("homeOdds", homeOdds);
+        if (drawOdds != null) body.put("drawOdds", drawOdds);
+        if (awayOdds != null) body.put("awayOdds", awayOdds);
         return body;
     }
 }

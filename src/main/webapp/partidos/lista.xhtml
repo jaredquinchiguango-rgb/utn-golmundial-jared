@@ -10,6 +10,13 @@
     <ui:define name="eyebrow">Torneo</ui:define>
     <ui:define name="cabecera">Partidos</ui:define>
 
+    <ui:define name="acciones">
+        <h:form>
+            <h:commandButton value="+ Nuevo partido" styleClass="btn btn-primary"
+                             action="#{partidoBean.prepararNuevo()}"/>
+        </h:form>
+    </ui:define>
+
     <ui:define name="contenido">
         <div class="card">
             <div class="card-header">Calendario del torneo</div>
@@ -43,16 +50,18 @@
                                     <td>#{p.nombreSede}</td>
                                     <td>#{p.nombreFase}</td>
                                     <td>
-                                        <h:panelGroup rendered="#{p.estado eq 'programado'}">
+                                        <!-- TODO: confirmar con Ariel el listado COMPLETO de valores
+                                             de "status" - solo se confirmo "PROGRAMADO" -->
+                                        <h:panelGroup rendered="#{p.estado eq 'PROGRAMADO'}">
                                             <span class="badge-tag badge-gold">Programado</span>
                                         </h:panelGroup>
-                                        <h:panelGroup rendered="#{p.estado eq 'en_juego'}">
+                                        <h:panelGroup rendered="#{p.estado eq 'EN_JUEGO'}">
                                             <span class="badge-tag badge-pitch"><span class="live-dot"/> En juego</span>
                                         </h:panelGroup>
-                                        <h:panelGroup rendered="#{p.estado eq 'finalizado'}">
+                                        <h:panelGroup rendered="#{p.estado eq 'FINALIZADO'}">
                                             <span class="badge-tag badge-neutral">Finalizado</span>
                                         </h:panelGroup>
-                                        <h:panelGroup rendered="#{p.estado ne 'programado' and p.estado ne 'en_juego' and p.estado ne 'finalizado'}">
+                                        <h:panelGroup rendered="#{p.estado ne 'PROGRAMADO' and p.estado ne 'EN_JUEGO' and p.estado ne 'FINALIZADO'}">
                                             <span class="badge-tag badge-neutral">#{p.estado}</span>
                                         </h:panelGroup>
                                     </td>

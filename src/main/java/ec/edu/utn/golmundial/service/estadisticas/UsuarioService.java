@@ -14,7 +14,9 @@ import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,13 +40,28 @@ public class UsuarioService {
         if (client != null) client.close();
     }
 
-    // TODO: confirmar path con Ariel (ej: /usuarios)
-    public List<UsuarioDTO> listarTodos() {
+    private String basicAuthHeader(String email, String password) {
+        String credenciales = email + ":" + password;
+        return "Basic " + Base64.getEncoder().encodeToString(credenciales.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * GET /api/usuarios EXIGE Basic Auth con rol ADMINISTRADOR (confirmado
+     * por Ariel). Recibe el email/password del admin ya logueado, que
+     * LoginBean conserva durante la sesion para este proposito.
+     */
+    public List<UsuarioDTO> listarTodos(String emailAdmin, String passwordAdmin) {
         try {
             Response response = client
                 .target(ApiConfig.BASE_URL_ESTADISTICAS + "/usuarios")
                 .request(MediaType.APPLICATION_JSON)
+                .header("Authorization", basicAuthHeader(emailAdmin, passwordAdmin))
                 .get();
+
+            if (response.getStatus() != 200) {
+                LOG.warning("GET /usuarios devolvio status " + response.getStatus());
+                return new ArrayList<>();
+            }
 
             String json = response.readEntity(String.class);
             return mapper.readValue(json, new TypeReference<List<UsuarioDTO>>() {});
@@ -55,15 +72,17 @@ public class UsuarioService {
         }
     }
 
-    // Habilitar / deshabilitar una cuenta (RF23)
-    public boolean cambiarEstado(Integer idUsuario, boolean nuevoEstado) {
+    /** PUT /api/usuarios/{id} con {"active": true/false} (RF23, confirmado). */
+    public boolean cambiarEstado(Integer idUsuario, boolean nuevoEstado,
+                                  String emailAdmin, String passwordAdmin) {
         try {
             ObjectNode body = mapper.createObjectNode();
-            body.put("estado", nuevoEstado);
+            body.put("active", nuevoEstado);
 
             Response response = client
-                .target(ApiConfig.BASE_URL_ESTADISTICAS + "/usuarios/" + idUsuario + "/estado")
+                .target(ApiConfig.BASE_URL_ESTADISTICAS + "/usuarios/" + idUsuario)
                 .request(MediaType.APPLICATION_JSON)
+                .header("Authorization", basicAuthHeader(emailAdmin, passwordAdmin))
                 .put(Entity.json(mapper.writeValueAsString(body)));
 
             return response.getStatus() == 200;
@@ -74,16 +93,7 @@ public class UsuarioService {
         }
     }
 
-    /**
-     * Login contra el Servicio de Estadisticas (RF02).
-     * Endpoint y estructura CONFIRMADOS por Ariel:
-     *   POST {BASE_URL_ESTADISTICAS}/login
-     *   body:     {"email": "...", "password": "..."}
-     *   response: {"idUser":1,"name":"...","email":"...","username":"...",
-     *              "active":true,"role":"ADMINISTRADOR","idRole":1}
-     * El mapeo ingles->espanol de la respuesta lo resuelve UsuarioDTO
-     * con @JsonProperty, no hace falta tocar nada aqui.
-     */
+    /** POST /api/login (confirmado). No exige Basic Auth, es el login mismo. */
     public UsuarioDTO login(String email, String password) {
         try {
             ObjectNode body = mapper.createObjectNode();

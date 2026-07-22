@@ -24,13 +24,11 @@ public class LoginBean implements Serializable {
         UsuarioDTO usuario = usuarioService.login(correo, clave);
 
         if (usuario == null) {
+            clave = null;
             msg(FacesMessage.SEVERITY_ERROR, "Correo o clave incorrectos.");
             return null;
         }
 
-        // Este panel es exclusivamente para administradores; el publico
-        // general entra por el frontend publico, no por aqui (RF25).
-        // El backend de Ariel devuelve el rol en mayusculas ("ADMINISTRADOR").
         if (!"ADMINISTRADOR".equals(usuario.getNombreRol())) {
             clave = null;
             msg(FacesMessage.SEVERITY_ERROR,
@@ -38,8 +36,13 @@ public class LoginBean implements Serializable {
             return null;
         }
 
+        // OJO: aqui NO se borra "clave" tras un login exitoso a proposito.
+        // GET /api/usuarios y todas las escrituras (crear/editar partido,
+        // registrar resultado, editar seleccion) exigen Basic Auth en cada
+        // peticion, asi que necesitamos conservarla en memoria del
+        // servidor durante la sesion. Nunca se muestra en pantalla ni
+        // se registra en logs.
         usuarioActual = usuario;
-        clave = null;
         return "/index?faces-redirect=true";
     }
 

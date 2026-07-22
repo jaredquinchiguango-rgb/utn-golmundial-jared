@@ -1,18 +1,32 @@
 package ec.edu.utn.golmundial.dto.estadisticas;
 
-import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class UsuarioDTO {
 
+    @JsonProperty("idUser")
     private Integer idUsuario;
+
+    @JsonProperty("name")
     private String  nombre;
+
     private String  email;
     private String  username;
+
+    @JsonProperty("active")
     private Boolean estado;
-    private LocalDateTime fechaRegistro;
-    private LocalDateTime ultimoAcceso;
+
+    @JsonProperty("registeredAt")
+    private Long fechaRegistro;
+
+    @JsonProperty("lastAccess")
+    private Long ultimoAcceso;
+
+    @JsonProperty("idRole")
     private Integer idRol;
-    private String  nombreRol;
+
+    @JsonProperty("role")
+    private String  nombreRol; // viene en mayusculas: "ADMINISTRADOR"
 
     public UsuarioDTO() {}
 
@@ -31,11 +45,11 @@ public class UsuarioDTO {
     public Boolean getEstado()                       { return estado; }
     public void    setEstado(Boolean v)              { this.estado = v; }
 
-    public LocalDateTime getFechaRegistro()          { return fechaRegistro; }
-    public void    setFechaRegistro(LocalDateTime v) { this.fechaRegistro = v; }
+    public Long getFechaRegistro()          { return fechaRegistro; }
+    public void setFechaRegistro(Long v)    { this.fechaRegistro = v; }
 
-    public LocalDateTime getUltimoAcceso()           { return ultimoAcceso; }
-    public void    setUltimoAcceso(LocalDateTime v)  { this.ultimoAcceso = v; }
+    public Long getUltimoAcceso()           { return ultimoAcceso; }
+    public void setUltimoAcceso(Long v)     { this.ultimoAcceso = v; }
 
     public Integer getIdRol()                        { return idRol; }
     public void    setIdRol(Integer v)                { this.idRol = v; }

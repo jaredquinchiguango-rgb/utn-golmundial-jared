@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import ec.edu.utn.golmundial.dto.estadisticas.SeleccionDTO;
 import ec.edu.utn.golmundial.util.ApiConfig;
+import ec.edu.utn.golmundial.util.BasicAuthUtil;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -37,7 +38,7 @@ public class SeleccionService {
         if (client != null) client.close();
     }
 
-    // TODO: confirmar path real con Ariel (ej: /selecciones)
+    /** GET, lectura abierta para invitados - no necesita Basic Auth. */
     public List<SeleccionDTO> listarTodas() {
         try {
             Response response = client
@@ -55,24 +56,29 @@ public class SeleccionService {
     }
 
     /**
-     * Actualiza los datos editables de una seleccion (RF10). Los campos
-     * estadisticos (partidosJugados, puntos, golesFavor, etc.) NO se
-     * envian: esos los calcula y actualiza el propio backend cuando se
-     * registra un resultado (RF06), no se editan manualmente aqui.
+     * PUT, escritura - EXIGE Basic Auth de administrador.
      *
-     * TODO: confirmar path con Ariel (ej: PUT /selecciones/{id})
+     * Nota sobre idConfederacion: confirmado en el codigo fuente de Ariel
+     * que si se manda null, el backend simplemente NO TOCA ese campo (deja
+     * el valor que ya tenia la seleccion) - no hace falta resolverlo,
+     * mandar null aqui es seguro y es el comportamiento correcto mientras
+     * no exista forma de saber cual es.
      */
-    public boolean actualizar(SeleccionDTO dto) {
+    public boolean actualizar(SeleccionDTO dto, Integer idGrupo, Integer idConfederacion,
+                               String emailAdmin, String passwordAdmin) {
         try {
             ObjectNode body = mapper.createObjectNode();
-            body.put("nombre", dto.getNombre());
-            body.put("codigoFifa", dto.getCodigoFifa());
-            body.put("esAnfitrion", dto.getEsAnfitrion());
-            body.put("idGrupo", dto.getIdGrupo());
+            body.put("name", dto.getNombre());
+            body.put("fifaCode", dto.getCodigoFifa());
+            body.put("isHost", dto.getEsAnfitrion());
+            body.put("qualification", dto.getClasificacion());
+            if (idGrupo != null) body.put("idGroup", idGrupo); else body.putNull("idGroup");
+            if (idConfederacion != null) body.put("idConfederation", idConfederacion); else body.putNull("idConfederation");
 
             Response response = client
                 .target(ApiConfig.BASE_URL_ESTADISTICAS + "/selecciones/" + dto.getIdSeleccion())
                 .request(MediaType.APPLICATION_JSON)
+                .header("Authorization", BasicAuthUtil.buildHeader(emailAdmin, passwordAdmin))
                 .put(Entity.json(mapper.writeValueAsString(body)));
 
             return response.getStatus() == 200;

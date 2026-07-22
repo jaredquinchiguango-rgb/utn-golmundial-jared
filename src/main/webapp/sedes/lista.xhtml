@@ -6,6 +6,7 @@
 <ui:composition template="/WEB-INF/templates/layout.xhtml">
 
     <ui:define name="titulo">Sedes</ui:define>
+    <ui:define name="eyebrow">Torneo</ui:define>
     <ui:define name="cabecera">Cat&#225;logo del torneo</ui:define>
 
     <ui:define name="contenido">
@@ -22,26 +23,23 @@
                 <div class="table-container">
                     <table>
                         <thead>
-                            <tr><th>Estadio</th><th>Ciudad</th><th>Capacidad</th></tr>
+                            <tr><th>Estadio</th><th>Ciudad</th><th>Pais</th><th>Capacidad</th></tr>
                         </thead>
                         <tbody>
                             <ui:repeat value="#{sedeBean.sedes}" var="s">
                                 <tr>
                                     <td>#{s.estadio}</td>
                                     <td>#{s.nombreCiudad}</td>
-                                    <td>#{s.capacidad}</td>
+                                    <td>#{s.pais}</td>
+                                    <td><span class="score">#{s.capacidad}</span></td>
                                 </tr>
                             </ui:repeat>
                             <ui:fragment rendered="#{empty sedeBean.sedes}">
-                                <tr><td colspan="3" class="text-center text-muted">No hay sedes registradas.</td></tr>
+                                <tr><td colspan="4" class="text-center text-muted">No hay sedes registradas.</td></tr>
                             </ui:fragment>
                         </tbody>
                     </table>
                 </div>
-                <p class="text-muted mt-2">
-                    Las sedes se cargan desde el seed inicial del torneo (RF28); esta vista es
-                    solo de consulta.
-                </p>
             </div>
         </div>
     </ui:define>

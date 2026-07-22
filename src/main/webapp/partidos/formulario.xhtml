@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:p="jakarta.faces.passthrough"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">#{partidoBean.esEdicion ? 'Editar partido' : 'Nuevo partido'}</ui:define>
+    <ui:define name="eyebrow">Torneo</ui:define>
+    <ui:define name="cabecera">#{partidoBean.esEdicion ? 'Editar partido' : 'Nuevo partido'}</ui:define>
+
+    <ui:define name="contenido">
+        <div class="card" style="max-width:680px;margin:0 auto;">
+            <div class="card-header">Datos del partido</div>
+            <div class="card-body">
+                <h:form id="formPartido">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <h:outputLabel for="numeroFifa" value="Numero de partido FIFA *"/>
+                            <h:inputText id="numeroFifa" value="#{partidoBean.numeroPartidoFifaForm}"
+                                         required="true" requiredMessage="Obligatorio.">
+                                <f:convertNumber integerOnly="true"/>
+                            </h:inputText>
+                        </div>
+                        <div class="form-group">
+                            <h:outputLabel for="status" value="Estado *"/>
+                            <h:inputText id="status" value="#{partidoBean.statusForm}"
+                                         required="true" requiredMessage="Obligatorio."/>
+                        </div>
+                        <div class="form-group">
+                            <h:outputLabel for="fecha" value="Fecha UTC (AAAA-MM-DD) *"/>
+                            <h:inputText id="fecha" value="#{partidoBean.fechaForm}"
+                                         required="true" requiredMessage="Obligatorio."
+                                         p:placeholder="2026-07-05"/>
+                        </div>
+                        <div class="form-group">
+                            <h:outputLabel for="hora" value="Hora UTC (HH:mm) *"/>
+                            <h:inputText id="hora" value="#{partidoBean.horaForm}"
+                                         required="true" requiredMessage="Obligatorio."
+                                         p:placeholder="18:00"/>
+                        </div>
+                        <div class="form-group">
+                            <h:outputLabel for="local" value="Seleccion local *"/>
+                            <h:selectOneMenu id="local" value="#{partidoBean.idSeleccionLocalForm}"
+                                             required="true" requiredMessage="Obligatorio.">
+                                <f:selectItem itemLabel="-- Seleccione --" itemValue="#{null}"/>
+                                <f:selectItems value="#{partidoBean.selecciones}" var="s"
+                                               itemValue="#{s.idSeleccion}" itemLabel="#{s.nombre}"/>
+                            </h:selectOneMenu>
+                        </div>
+                        <div class="form-group">
+                            <h:outputLabel for="visitante" value="Seleccion visitante *"/>
+                            <h:selectOneMenu id="visitante" value="#{partidoBean.idSeleccionVisitanteForm}"
+                                             required="true" requiredMessage="Obligatorio.">
+                                <f:selectItem itemLabel="-- Seleccione --" itemValue="#{null}"/>
+                                <f:selectItems value="#{partidoBean.selecciones}" var="s"
+                                               itemValue="#{s.idSeleccion}" itemLabel="#{s.nombre}"/>
+                            </h:selectOneMenu>
+                        </div>
+                        <div class="form-group">
+                            <h:outputLabel for="sede" value="Sede *"/>
+                            <h:selectOneMenu id="sede" value="#{partidoBean.idSedeForm}"
+                                             required="true" requiredMessage="Obligatorio.">
+                                <f:selectItem itemLabel="-- Seleccione --" itemValue="#{null}"/>
+                                <f:selectItems value="#{partidoBean.sedes}" var="sd"
+                                               itemValue="#{sd.idSede}" itemLabel="#{sd.estadio}"/>
+                            </h:selectOneMenu>
+                        </div>
+                        <div class="form-group">
+                            <h:outputLabel for="fase" value="Fase *"/>
+                            <h:selectOneMenu id="fase" value="#{partidoBean.idFaseForm}"
+                                             required="true" requiredMessage="Obligatorio.">
+                                <f:selectItem itemLabel="-- Seleccione --" itemValue="#{null}"/>
+                                <f:selectItems value="#{partidoBean.fases}" var="f"
+                                               itemValue="#{f.idFase}" itemLabel="#{f.nombre}"/>
+                            </h:selectOneMenu>
+                        </div>
+                        <div class="form-group">
+                            <h:outputLabel for="grupo" value="Grupo (solo fase de grupos)"/>
+                            <h:selectOneMenu id="grupo" value="#{partidoBean.idGrupoForm}">
+                                <f:selectItem itemLabel="-- No aplica --" itemValue="#{null}"/>
+                                <f:selectItems value="#{partidoBean.grupos}" var="g"
+                                               itemValue="#{g.idGrupo}" itemLabel="#{g.nombre}"/>
+                            </h:selectOneMenu>
+                        </div>
+                        <div class="form-group">
+                            <h:outputLabel for="cuotaLocal" value="Cuota local"/>
+                            <h:inputText id="cuotaLocal" value="#{partidoBean.homeOddsForm}">
+                                <f:convertNumber maxFractionDigits="2"/>
+                            </h:inputText>
+                        </div>
+                        <div class="form-group">
+                            <h:outputLabel for="cuotaEmpate" value="Cuota empate"/>
+                            <h:inputText id="cuotaEmpate" value="#{partidoBean.drawOddsForm}">
+                                <f:convertNumber maxFractionDigits="2"/>
+                            </h:inputText>
+                        </div>
+                        <div class="form-group">
+                            <h:outputLabel for="cuotaVisitante" value="Cuota visitante"/>
+                            <h:inputText id="cuotaVisitante" value="#{partidoBean.awayOddsForm}">
+                                <f:convertNumber maxFractionDigits="2"/>
+                            </h:inputText>
+                        </div>
+                    </div>
+                    <p class="text-muted mt-2">
+                        El estado (status) es un campo libre por ahora: solo se confirmo el
+                        valor "PROGRAMADO" con Ariel, falta confirmar el resto.
+                    </p>
+                    <div class="form-actions">
+                        <h:commandButton value="Cancelar"
+                                         styleClass="btn btn-outline"
+                                         action="#{partidoBean.cancelar()}"
+                                         immediate="true"/>
+                        <h:commandButton value="Guardar"
+                                         styleClass="btn btn-primary"
+                                         action="#{partidoBean.guardar()}"/>
+                    </div>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>
+</html>

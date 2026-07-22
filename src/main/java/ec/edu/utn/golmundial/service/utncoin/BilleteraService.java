@@ -1,8 +1,7 @@
 package ec.edu.utn.golmundial.service.utncoin;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ec.edu.utn.golmundial.dto.utncoin.BilleteraDTO;
+import ec.edu.utn.golmundial.dto.utncoin.TotalCirculacionDTO;
 import ec.edu.utn.golmundial.util.ApiConfig;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -12,8 +11,6 @@ import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,29 +33,26 @@ public class BilleteraService {
         if (client != null) client.close();
     }
 
-    // TODO: confirmar con Puma el path real. Puede que el .NET ya exponga
-    // un endpoint de reporte tipo /billeteras/total-circulante en vez de
-    // tener que traer todas y sumar aqui.
-    public List<BilleteraDTO> listarTodas() {
+    /** GET /api/Wallets/total-circulation (confirmado por Puma). */
+    public BigDecimal obtenerTotalCirculante() {
         try {
             Response response = client
-                .target(ApiConfig.BASE_URL_UTNCOIN + "/billeteras")
+                .target(ApiConfig.BASE_URL_UTNCOIN + "/api/Wallets/total-circulation")
                 .request(MediaType.APPLICATION_JSON)
                 .get();
 
+            if (response.getStatus() != 200) {
+                LOG.warning("GET /Wallets/total-circulation devolvio status " + response.getStatus());
+                return BigDecimal.ZERO;
+            }
+
             String json = response.readEntity(String.class);
-            return mapper.readValue(json, new TypeReference<List<BilleteraDTO>>() {});
+            TotalCirculacionDTO dto = mapper.readValue(json, TotalCirculacionDTO.class);
+            return dto.getTotalCirculante() != null ? dto.getTotalCirculante() : BigDecimal.ZERO;
 
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Error al listar billeteras", e);
-            return new ArrayList<>();
+            LOG.log(Level.SEVERE, "Error al obtener total circulante", e);
+            return BigDecimal.ZERO;
         }
-    }
-
-    public BigDecimal calcularTotalCirculante() {
-        return listarTodas().stream()
-                .map(BilleteraDTO::getSaldo)
-                .filter(java.util.Objects::nonNull)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

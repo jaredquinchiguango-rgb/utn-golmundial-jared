@@ -2,8 +2,7 @@ package ec.edu.utn.golmundial.service.utncoin;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import ec.edu.utn.golmundial.dto.utncoin.PrediccionDTO;
+import ec.edu.utn.golmundial.dto.utncoin.ReportePrediccionDTO;
 import ec.edu.utn.golmundial.util.ApiConfig;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -28,7 +27,7 @@ public class PrediccionService {
     @PostConstruct
     public void init() {
         client = ClientBuilder.newClient();
-        mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        mapper = new ObjectMapper();
     }
 
     @PreDestroy
@@ -36,19 +35,27 @@ public class PrediccionService {
         if (client != null) client.close();
     }
 
-    // TODO: confirmar path con Puma (ej: /predicciones)
-    public List<PrediccionDTO> listarTodas() {
+    /**
+     * GET /api/Predictions/report/most-predicted (confirmado por Puma).
+     * Ya viene ordenado de mayor a menor - no hace falta ordenar aqui.
+     */
+    public List<ReportePrediccionDTO> obtenerReporteMasPredichos() {
         try {
             Response response = client
-                .target(ApiConfig.BASE_URL_UTNCOIN + "/predicciones")
+                .target(ApiConfig.BASE_URL_UTNCOIN + "/api/Predictions/report/most-predicted")
                 .request(MediaType.APPLICATION_JSON)
                 .get();
 
+            if (response.getStatus() != 200) {
+                LOG.warning("GET /Predictions/report/most-predicted devolvio status " + response.getStatus());
+                return new ArrayList<>();
+            }
+
             String json = response.readEntity(String.class);
-            return mapper.readValue(json, new TypeReference<List<PrediccionDTO>>() {});
+            return mapper.readValue(json, new TypeReference<List<ReportePrediccionDTO>>() {});
 
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Error al listar predicciones", e);
+            LOG.log(Level.SEVERE, "Error al obtener reporte de predicciones", e);
             return new ArrayList<>();
         }
     }

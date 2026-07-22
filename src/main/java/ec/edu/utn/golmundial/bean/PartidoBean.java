@@ -1,10 +1,12 @@
 package ec.edu.utn.golmundial.bean;
 
 import ec.edu.utn.golmundial.dto.estadisticas.FaseDTO;
+import ec.edu.utn.golmundial.dto.estadisticas.GrupoDTO;
 import ec.edu.utn.golmundial.dto.estadisticas.PartidoDTO;
 import ec.edu.utn.golmundial.dto.estadisticas.SedeDTO;
 import ec.edu.utn.golmundial.dto.estadisticas.SeleccionDTO;
 import ec.edu.utn.golmundial.service.estadisticas.FaseService;
+import ec.edu.utn.golmundial.service.estadisticas.GrupoService;
 import ec.edu.utn.golmundial.service.estadisticas.PartidoService;
 import ec.edu.utn.golmundial.service.estadisticas.SedeService;
 import ec.edu.utn.golmundial.service.estadisticas.SeleccionService;
@@ -15,6 +17,10 @@ import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Named
@@ -25,22 +31,40 @@ public class PartidoBean implements Serializable {
     @Inject private SeleccionService seleccionService;
     @Inject private SedeService      sedeService;
     @Inject private FaseService      faseService;
+    @Inject private GrupoService     grupoService;
+    @Inject private LoginBean        loginBean; // para reenviar credenciales (Basic Auth)
 
     private List<PartidoDTO>   partidos;
     private List<SeleccionDTO> selecciones;
     private List<SedeDTO>      sedes;
     private List<FaseDTO>      fases;
+    private List<GrupoDTO>     grupos;
 
     private PartidoDTO partidoSeleccionado;
     private Integer    golesLocalForm;
     private Integer    golesVisitanteForm;
 
+    private Integer    idPartidoEnEdicion;
+    private Integer    numeroPartidoFifaForm;
+    private String     fechaForm;
+    private String     horaForm;
+    private String      statusForm;
+    private Integer    idFaseForm;
+    private Integer    idSedeForm;
+    private Integer    idGrupoForm;
+    private Integer    idSeleccionLocalForm;
+    private Integer    idSeleccionVisitanteForm;
+    private BigDecimal homeOddsForm;
+    private BigDecimal drawOddsForm;
+    private BigDecimal awayOddsForm;
+
     @PostConstruct
     public void init() {
         cargarPartidos();
         selecciones = seleccionService.listarTodas();
-        sedes       = sedeService.listarTodas();
-        fases       = faseService.listarTodas();
+        sedes = sedeService.listarTodas();
+        fases = faseService.listarTodas();
+        grupos = grupoService.listarTodos();
     }
 
     public void cargarPartidos() {
@@ -48,35 +72,113 @@ public class PartidoBean implements Serializable {
     }
 
     public String prepararNuevo() {
-        partidoSeleccionado = new PartidoDTO();
-        return "/partidos/nuevo?faces-redirect=true";
-    }
-
-    public String guardarNuevo() {
-        boolean exito = partidoService.crear(partidoSeleccionado);
-        if (exito) {
-            cargarPartidos();
-            msg(FacesMessage.SEVERITY_INFO, "Partido creado correctamente.");
-            return "/partidos/lista?faces-redirect=true";
-        }
-        msg(FacesMessage.SEVERITY_ERROR, "No se pudo crear el partido. Verifique los datos.");
-        return null;
+        idPartidoEnEdicion = null;
+        numeroPartidoFifaForm = null;
+        fechaForm = null;
+        horaForm = null;
+        statusForm = "PROGRAMADO";
+        idFaseForm = null;
+        idSedeForm = null;
+        idGrupoForm = null;
+        idSeleccionLocalForm = null;
+        idSeleccionVisitanteForm = null;
+        homeOddsForm = null;
+        drawOddsForm = null;
+        awayOddsForm = null;
+        return "/partidos/formulario?faces-redirect=true";
     }
 
     public String prepararEditar(PartidoDTO partido) {
-        partidoSeleccionado = partido;
-        return "/partidos/editar?faces-redirect=true";
+        idPartidoEnEdicion = partido.getIdPartido();
+        numeroPartidoFifaForm = partido.getNumeroPartidoFifa();
+
+        if (partido.getFechaHoraUtc() != null) {
+            fechaForm = partido.getFechaHoraUtc().toLocalDate().toString();
+            horaForm = String.format("%02d:%02d",
+                    partido.getFechaHoraUtc().getHour(), partido.getFechaHoraUtc().getMinute());
+        } else {
+            fechaForm = null;
+            horaForm = null;
+        }
+
+        statusForm = partido.getEstado();
+        idSeleccionLocalForm = resolverIdSeleccionPorNombre(partido.getNombreSeleccionLocal());
+        idSeleccionVisitanteForm = resolverIdSeleccionPorNombre(partido.getNombreSeleccionVisitante());
+        idSedeForm = resolverIdSedePorNombre(partido.getNombreSede());
+        idFaseForm = resolverIdFasePorNombre(partido.getNombreFase());
+        idGrupoForm = resolverIdGrupoPorNombre(partido.getNombreGrupo());
+        homeOddsForm = null;
+        drawOddsForm = null;
+        awayOddsForm = null;
+
+        return "/partidos/formulario?faces-redirect=true";
     }
 
-    public String guardarEdicion() {
-        boolean exito = partidoService.actualizar(partidoSeleccionado);
+    private Integer resolverIdSeleccionPorNombre(String nombre) {
+        if (nombre == null || selecciones == null) return null;
+        return selecciones.stream()
+                .filter(s -> nombre.equals(s.getNombre()))
+                .map(SeleccionDTO::getIdSeleccion)
+                .findFirst().orElse(null);
+    }
+
+    private Integer resolverIdSedePorNombre(String nombreSede) {
+        if (nombreSede == null || sedes == null) return null;
+        return sedes.stream()
+                .filter(s -> nombreSede.equals(s.getEstadio()))
+                .map(SedeDTO::getIdSede)
+                .findFirst().orElse(null);
+    }
+
+    private Integer resolverIdFasePorNombre(String nombreFase) {
+        if (nombreFase == null || fases == null) return null;
+        return fases.stream()
+                .filter(f -> nombreFase.equals(f.getNombre()))
+                .map(FaseDTO::getIdFase)
+                .findFirst().orElse(null);
+    }
+
+    private Integer resolverIdGrupoPorNombre(String nombreGrupo) {
+        if (nombreGrupo == null || grupos == null) return null;
+        return grupos.stream()
+                .filter(g -> nombreGrupo.equals(g.getNombre()))
+                .map(GrupoDTO::getIdGrupo)
+                .findFirst().orElse(null);
+    }
+
+    public String guardar() {
+        LocalDateTime fechaHoraUtc = combinarFechaHora();
+        boolean exito;
+
+        if (idPartidoEnEdicion == null) {
+            exito = partidoService.crear(numeroPartidoFifaForm, fechaHoraUtc, statusForm,
+                    idFaseForm, idSedeForm, idGrupoForm,
+                    idSeleccionLocalForm, idSeleccionVisitanteForm,
+                    homeOddsForm, drawOddsForm, awayOddsForm,
+                    loginBean.getCorreo(), loginBean.getClave());
+        } else {
+            exito = partidoService.actualizar(idPartidoEnEdicion, numeroPartidoFifaForm, fechaHoraUtc, statusForm,
+                    idFaseForm, idSedeForm, idGrupoForm,
+                    idSeleccionLocalForm, idSeleccionVisitanteForm,
+                    homeOddsForm, drawOddsForm, awayOddsForm,
+                    loginBean.getCorreo(), loginBean.getClave());
+        }
+
         if (exito) {
             cargarPartidos();
-            msg(FacesMessage.SEVERITY_INFO, "Partido actualizado correctamente.");
+            msg(FacesMessage.SEVERITY_INFO, idPartidoEnEdicion == null
+                    ? "Partido creado correctamente." : "Partido actualizado correctamente.");
             return "/partidos/lista?faces-redirect=true";
         }
-        msg(FacesMessage.SEVERITY_ERROR, "No se pudo actualizar el partido.");
+        msg(FacesMessage.SEVERITY_ERROR, "No se pudo guardar el partido. Verifique los datos.");
         return null;
+    }
+
+    private LocalDateTime combinarFechaHora() {
+        if (fechaForm == null || fechaForm.isBlank()) return null;
+        LocalDate fecha = LocalDate.parse(fechaForm);
+        LocalTime hora = (horaForm != null && !horaForm.isBlank()) ? LocalTime.parse(horaForm) : LocalTime.MIDNIGHT;
+        return LocalDateTime.of(fecha, hora);
     }
 
     public String prepararResultado(PartidoDTO partido) {
@@ -88,7 +190,8 @@ public class PartidoBean implements Serializable {
 
     public String guardarResultado() {
         boolean exito = partidoService.registrarResultado(
-                partidoSeleccionado.getIdPartido(), golesLocalForm, golesVisitanteForm);
+                partidoSeleccionado.getIdPartido(), golesLocalForm, golesVisitanteForm,
+                loginBean.getCorreo(), loginBean.getClave());
         if (exito) {
             cargarPartidos();
             msg(FacesMessage.SEVERITY_INFO,
@@ -108,17 +211,56 @@ public class PartidoBean implements Serializable {
         FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(nivel, texto, null));
     }
 
-    public List<PartidoDTO>   getPartidos()             { return partidos; }
-    public List<SeleccionDTO> getSelecciones()          { return selecciones; }
-    public List<SedeDTO>      getSedes()                { return sedes; }
-    public List<FaseDTO>      getFases()                { return fases; }
+    public boolean isEsEdicion() { return idPartidoEnEdicion != null; }
 
-    public PartidoDTO getPartidoSeleccionado()          { return partidoSeleccionado; }
-    public void       setPartidoSeleccionado(PartidoDTO v) { this.partidoSeleccionado = v; }
+    public List<PartidoDTO>   getPartidos()     { return partidos; }
+    public List<SeleccionDTO> getSelecciones()  { return selecciones; }
+    public List<SedeDTO>      getSedes()        { return sedes; }
+    public List<FaseDTO>      getFases()        { return fases; }
+    public List<GrupoDTO>     getGrupos()       { return grupos; }
 
-    public Integer getGolesLocalForm()                  { return golesLocalForm; }
-    public void    setGolesLocalForm(Integer v)         { this.golesLocalForm = v; }
+    public PartidoDTO getPartidoSeleccionado()              { return partidoSeleccionado; }
+    public void       setPartidoSeleccionado(PartidoDTO v)  { this.partidoSeleccionado = v; }
 
-    public Integer getGolesVisitanteForm()               { return golesVisitanteForm; }
-    public void    setGolesVisitanteForm(Integer v)      { this.golesVisitanteForm = v; }
+    public Integer getGolesLocalForm()                      { return golesLocalForm; }
+    public void    setGolesLocalForm(Integer v)             { this.golesLocalForm = v; }
+
+    public Integer getGolesVisitanteForm()                   { return golesVisitanteForm; }
+    public void    setGolesVisitanteForm(Integer v)          { this.golesVisitanteForm = v; }
+
+    public Integer getNumeroPartidoFifaForm()                { return numeroPartidoFifaForm; }
+    public void    setNumeroPartidoFifaForm(Integer v)       { this.numeroPartidoFifaForm = v; }
+
+    public String  getFechaForm()                            { return fechaForm; }
+    public void    setFechaForm(String v)                    { this.fechaForm = v; }
+
+    public String  getHoraForm()                             { return horaForm; }
+    public void    setHoraForm(String v)                     { this.horaForm = v; }
+
+    public String  getStatusForm()                           { return statusForm; }
+    public void    setStatusForm(String v)                   { this.statusForm = v; }
+
+    public Integer getIdFaseForm()                           { return idFaseForm; }
+    public void    setIdFaseForm(Integer v)                  { this.idFaseForm = v; }
+
+    public Integer getIdSedeForm()                           { return idSedeForm; }
+    public void    setIdSedeForm(Integer v)                  { this.idSedeForm = v; }
+
+    public Integer getIdGrupoForm()                          { return idGrupoForm; }
+    public void    setIdGrupoForm(Integer v)                 { this.idGrupoForm = v; }
+
+    public Integer getIdSeleccionLocalForm()                 { return idSeleccionLocalForm; }
+    public void    setIdSeleccionLocalForm(Integer v)        { this.idSeleccionLocalForm = v; }
+
+    public Integer getIdSeleccionVisitanteForm()             { return idSeleccionVisitanteForm; }
+    public void    setIdSeleccionVisitanteForm(Integer v)    { this.idSeleccionVisitanteForm = v; }
+
+    public BigDecimal getHomeOddsForm()                      { return homeOddsForm; }
+    public void       setHomeOddsForm(BigDecimal v)          { this.homeOddsForm = v; }
+
+    public BigDecimal getDrawOddsForm()                      { return drawOddsForm; }
+    public void       setDrawOddsForm(BigDecimal v)          { this.drawOddsForm = v; }
+
+    public BigDecimal getAwayOddsForm()                      { return awayOddsForm; }
+    public void       setAwayOddsForm(BigDecimal v)          { this.awayOddsForm = v; }
 }
