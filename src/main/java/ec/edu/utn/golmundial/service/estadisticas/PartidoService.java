@@ -3,7 +3,6 @@ package ec.edu.utn.golmundial.service.estadisticas;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import ec.edu.utn.golmundial.dto.estadisticas.PartidoDTO;
 import ec.edu.utn.golmundial.util.ApiConfig;
 import ec.edu.utn.golmundial.util.BasicAuthUtil;
@@ -17,6 +16,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -27,13 +27,19 @@ public class PartidoService {
 
     private static final Logger LOG = Logger.getLogger(PartidoService.class.getName());
 
+    // Formato EXACTO que exige el backend de Ariel al crear/editar
+    // (confirmado en su codigo: SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")).
+    // Si no coincide, el backend ignora la fecha en silencio (try/catch vacio).
+    private static final DateTimeFormatter FORMATO_FECHA_BACKEND =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+
     private Client       client;
     private ObjectMapper mapper;
 
     @PostConstruct
     public void init() {
         client = ClientBuilder.newClient();
-        mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        mapper = new ObjectMapper();
     }
 
     @PreDestroy
@@ -41,7 +47,6 @@ public class PartidoService {
         if (client != null) client.close();
     }
 
-    /** GET, lectura abierta para invitados - no necesita Basic Auth. */
     public List<PartidoDTO> listarTodos() {
         try {
             Response response = client
@@ -76,7 +81,6 @@ public class PartidoService {
         }
     }
 
-    /** POST, escritura - EXIGE Basic Auth de administrador. */
     public boolean crear(Integer fifaMatchNumber, LocalDateTime fechaHoraUtc, String status,
                           Integer idPhase, Integer idVenue, Integer idGroup,
                           Integer idHomeTeam, Integer idAwayTeam,
@@ -101,7 +105,6 @@ public class PartidoService {
         }
     }
 
-    /** PUT, escritura - EXIGE Basic Auth de administrador. */
     public boolean actualizar(Integer idPartido, Integer fifaMatchNumber, LocalDateTime fechaHoraUtc,
                                String status, Integer idPhase, Integer idVenue, Integer idGroup,
                                Integer idHomeTeam, Integer idAwayTeam,
@@ -126,7 +129,7 @@ public class PartidoService {
         }
     }
 
-    /** PUT /partidos/{id}/resultado (RF11) - EXIGE Basic Auth de administrador. */
+    /** PUT /partidos/{id}/resultado (RF11). El backend pone status="FINALIZADO" solo. */
     public boolean registrarResultado(Integer idPartido, Integer golesLocal, Integer golesVisitante,
                                        String emailAdmin, String passwordAdmin) {
         try {
@@ -154,7 +157,8 @@ public class PartidoService {
             BigDecimal homeOdds, BigDecimal drawOdds, BigDecimal awayOdds) {
         ObjectNode body = mapper.createObjectNode();
         body.put("fifaMatchNumber", fifaMatchNumber);
-        body.put("matchDateTimeUtc", fechaHoraUtc != null ? fechaHoraUtc.toString() : null);
+        // Formato exacto exigido por el backend: "2026-07-05T18:00:00Z"
+        body.put("matchDateTimeUtc", fechaHoraUtc != null ? fechaHoraUtc.format(FORMATO_FECHA_BACKEND) : null);
         body.put("status", status);
         if (idPhase != null) body.put("idPhase", idPhase); else body.putNull("idPhase");
         if (idVenue != null) body.put("idVenue", idVenue); else body.putNull("idVenue");

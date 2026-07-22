@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+
+    <f:metadata>
+        <f:viewParam name="id" value="#{posicionesBean.idGrupoParam}"/>
+        <f:event type="preRenderView" listener="#{posicionesBean.cargar}"/>
+    </f:metadata>
+
+    <ui:define name="titulo">Posiciones</ui:define>
+    <ui:define name="eyebrow">Torneo</ui:define>
+    <ui:define name="cabecera">Tabla de posiciones</ui:define>
+
+    <ui:define name="acciones">
+        <h:link outcome="/grupos/lista" styleClass="btn btn-outline">Volver a grupos</h:link>
+    </ui:define>
+
+    <ui:define name="contenido">
+        <h:panelGroup rendered="#{posicionesBean.grupo == null}">
+            <div class="card"><div class="card-body text-center text-muted">
+                No se encontro el grupo solicitado.
+            </div></div>
+        </h:panelGroup>
+
+        <h:panelGroup rendered="#{posicionesBean.grupo != null}">
+            <div class="card">
+                <div class="card-header">#{posicionesBean.grupo.nombre}</div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Seleccion</th>
+                                    <th>PJ</th>
+                                    <th>Pts</th>
+                                    <th>G</th>
+                                    <th>E</th>
+                                    <th>P</th>
+                                    <th>GF</th>
+                                    <th>GC</th>
+                                    <th>DG</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <ui:repeat value="#{posicionesBean.grupo.posiciones}" var="s" varStatus="status">
+                                    <tr>
+                                        <td><span class="score">#{status.index + 1}</span></td>
+                                        <td>#{s.nombre} <span class="text-muted">(#{s.codigoFifa})</span></td>
+                                        <td>#{s.partidosJugados}</td>
+                                        <td><strong>#{s.puntos}</strong></td>
+                                        <td>#{s.partidosGanados}</td>
+                                        <td>#{s.partidosEmpatados}</td>
+                                        <td>#{s.partidosPerdidos}</td>
+                                        <td>#{s.golesFavor}</td>
+                                        <td>#{s.golesContra}</td>
+                                        <td>#{s.diferenciaGoles}</td>
+                                    </tr>
+                                </ui:repeat>
+                                <ui:fragment rendered="#{empty posicionesBean.grupo.posiciones}">
+                                    <tr><td colspan="10" class="text-center text-muted">Sin datos de posiciones todavia.</td></tr>
+                                </ui:fragment>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </h:panelGroup>
+    </ui:define>
+
+</ui:composition>
+</html>

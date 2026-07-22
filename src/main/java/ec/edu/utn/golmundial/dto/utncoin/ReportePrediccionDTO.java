@@ -2,11 +2,13 @@ package ec.edu.utn.golmundial.dto.utncoin;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * Mapea GET /api/Predictions/report/most-predicted (confirmado por Puma).
  * El backend ya lo devuelve ordenado de mayor a menor por cantidad.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ReportePrediccionDTO {
 
     @JsonProperty("matchId")

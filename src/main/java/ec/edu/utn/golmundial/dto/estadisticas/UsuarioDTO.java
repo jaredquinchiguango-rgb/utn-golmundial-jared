@@ -1,7 +1,9 @@
 package ec.edu.utn.golmundial.dto.estadisticas;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UsuarioDTO {
 
     @JsonProperty("idUser")

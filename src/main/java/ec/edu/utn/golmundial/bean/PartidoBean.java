@@ -23,6 +23,14 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+/**
+ * IMPORTANTE sobre @ViewScoped: al redirigir de una vista (ej. lista.xhtml)
+ * a otra distinta (ej. formulario.xhtml o resultado.xhtml), JSF crea una
+ * instancia NUEVA de este bean para la vista destino - el estado de la
+ * vista anterior (partidoSeleccionado, etc.) NO viaja solo. Por eso el id
+ * del registro se manda por la URL (f:viewParam) y cada vista lo vuelve a
+ * buscar en preRenderView, en vez de depender de un campo ya seteado.
+ */
 @Named
 @ViewScoped
 public class PartidoBean implements Serializable {
@@ -32,13 +40,16 @@ public class PartidoBean implements Serializable {
     @Inject private SedeService      sedeService;
     @Inject private FaseService      faseService;
     @Inject private GrupoService     grupoService;
-    @Inject private LoginBean        loginBean; // para reenviar credenciales (Basic Auth)
+    @Inject private LoginBean        loginBean;
 
     private List<PartidoDTO>   partidos;
     private List<SeleccionDTO> selecciones;
     private List<SedeDTO>      sedes;
     private List<FaseDTO>      fases;
     private List<GrupoDTO>     grupos;
+
+    // Bindeado por <f:viewParam name="id"> en formulario.xhtml y resultado.xhtml
+    private Integer idPartidoParam;
 
     private PartidoDTO partidoSeleccionado;
     private Integer    golesLocalForm;
@@ -71,24 +82,61 @@ public class PartidoBean implements Serializable {
         partidos = partidoService.listarTodos();
     }
 
+    // ---------------------------------------------------------------
+    // Navegacion (solo arman la URL con el id, ya no setean estado)
+    // ---------------------------------------------------------------
+
     public String prepararNuevo() {
-        idPartidoEnEdicion = null;
-        numeroPartidoFifaForm = null;
-        fechaForm = null;
-        horaForm = null;
-        statusForm = "PROGRAMADO";
-        idFaseForm = null;
-        idSedeForm = null;
-        idGrupoForm = null;
-        idSeleccionLocalForm = null;
-        idSeleccionVisitanteForm = null;
-        homeOddsForm = null;
-        drawOddsForm = null;
-        awayOddsForm = null;
         return "/partidos/formulario?faces-redirect=true";
     }
 
     public String prepararEditar(PartidoDTO partido) {
+        return "/partidos/formulario?faces-redirect=true&id=" + partido.getIdPartido();
+    }
+
+    public String prepararResultado(PartidoDTO partido) {
+        return "/partidos/resultado?faces-redirect=true&id=" + partido.getIdPartido();
+    }
+
+    // ---------------------------------------------------------------
+    // preRenderView de partidos/formulario.xhtml - busca el partido por
+    // idPartidoParam DENTRO de la lista ya cargada en este init() (no
+    // depende de ningun estado de la vista anterior)
+    // ---------------------------------------------------------------
+
+    public void inicializarFormulario() {
+        if (FacesContext.getCurrentInstance().isPostback()) {
+            return; // no reinicializar si es un postback (ej. fallo de validacion)
+        }
+
+        if (idPartidoParam == null) {
+            // Modo "nuevo"
+            idPartidoEnEdicion = null;
+            numeroPartidoFifaForm = null;
+            fechaForm = null;
+            horaForm = null;
+            statusForm = "PROGRAMADO";
+            idFaseForm = null;
+            idSedeForm = null;
+            idGrupoForm = null;
+            idSeleccionLocalForm = null;
+            idSeleccionVisitanteForm = null;
+            homeOddsForm = null;
+            drawOddsForm = null;
+            awayOddsForm = null;
+            return;
+        }
+
+        // Modo "editar"
+        PartidoDTO partido = partidos.stream()
+                .filter(p -> idPartidoParam.equals(p.getIdPartido()))
+                .findFirst().orElse(null);
+
+        if (partido == null) {
+            msg(FacesMessage.SEVERITY_ERROR, "No se encontro el partido solicitado.");
+            return;
+        }
+
         idPartidoEnEdicion = partido.getIdPartido();
         numeroPartidoFifaForm = partido.getNumeroPartidoFifa();
 
@@ -110,8 +158,30 @@ public class PartidoBean implements Serializable {
         homeOddsForm = null;
         drawOddsForm = null;
         awayOddsForm = null;
+    }
 
-        return "/partidos/formulario?faces-redirect=true";
+    // ---------------------------------------------------------------
+    // preRenderView de partidos/resultado.xhtml
+    // ---------------------------------------------------------------
+
+    public void inicializarResultado() {
+        if (FacesContext.getCurrentInstance().isPostback()) {
+            return;
+        }
+        if (idPartidoParam == null) {
+            msg(FacesMessage.SEVERITY_ERROR, "No se especifico el partido.");
+            return;
+        }
+        partidoSeleccionado = partidos.stream()
+                .filter(p -> idPartidoParam.equals(p.getIdPartido()))
+                .findFirst().orElse(null);
+
+        if (partidoSeleccionado == null) {
+            msg(FacesMessage.SEVERITY_ERROR, "No se encontro el partido solicitado.");
+            return;
+        }
+        golesLocalForm = partidoSeleccionado.getGolesLocal();
+        golesVisitanteForm = partidoSeleccionado.getGolesVisitante();
     }
 
     private Integer resolverIdSeleccionPorNombre(String nombre) {
@@ -181,14 +251,11 @@ public class PartidoBean implements Serializable {
         return LocalDateTime.of(fecha, hora);
     }
 
-    public String prepararResultado(PartidoDTO partido) {
-        partidoSeleccionado = partido;
-        golesLocalForm = partido.getGolesLocal();
-        golesVisitanteForm = partido.getGolesVisitante();
-        return "/partidos/resultado?faces-redirect=true";
-    }
-
     public String guardarResultado() {
+        if (partidoSeleccionado == null) {
+            msg(FacesMessage.SEVERITY_ERROR, "No hay partido seleccionado.");
+            return null;
+        }
         boolean exito = partidoService.registrarResultado(
                 partidoSeleccionado.getIdPartido(), golesLocalForm, golesVisitanteForm,
                 loginBean.getCorreo(), loginBean.getClave());
@@ -203,7 +270,6 @@ public class PartidoBean implements Serializable {
     }
 
     public String cancelar() {
-        partidoSeleccionado = null;
         return "/partidos/lista?faces-redirect=true";
     }
 
@@ -218,6 +284,9 @@ public class PartidoBean implements Serializable {
     public List<SedeDTO>      getSedes()        { return sedes; }
     public List<FaseDTO>      getFases()        { return fases; }
     public List<GrupoDTO>     getGrupos()       { return grupos; }
+
+    public Integer getIdPartidoParam()          { return idPartidoParam; }
+    public void    setIdPartidoParam(Integer v) { this.idPartidoParam = v; }
 
     public PartidoDTO getPartidoSeleccionado()              { return partidoSeleccionado; }
     public void       setPartidoSeleccionado(PartidoDTO v)  { this.partidoSeleccionado = v; }

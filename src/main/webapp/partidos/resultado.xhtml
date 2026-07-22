@@ -2,20 +2,56 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
+      xmlns:p="jakarta.faces.passthrough"
       xmlns:ui="jakarta.faces.facelets">
 
 <ui:composition template="/WEB-INF/templates/layout.xhtml">
 
+    <f:metadata>
+        <f:viewParam name="id" value="#{partidoBean.idPartidoParam}"/>
+        <f:event type="preRenderView" listener="#{partidoBean.inicializarResultado}"/>
+    </f:metadata>
+
     <ui:define name="titulo">Registrar resultado</ui:define>
+    <ui:define name="eyebrow">Torneo</ui:define>
     <ui:define name="cabecera">Registrar resultado oficial</ui:define>
 
     <ui:define name="contenido">
-        <div class="card" style="max-width:480px;margin:0 auto;">
+        <div class="card" style="max-width:520px;margin:0 auto;">
             <div class="card-header">
                 #{partidoBean.partidoSeleccionado.nombreSeleccionLocal} vs
                 #{partidoBean.partidoSeleccionado.nombreSeleccionVisitante}
             </div>
             <div class="card-body">
+
+                <div class="text-muted" style="margin-bottom:.75rem;font-size:.85rem;">
+                    <h:outputText value="#{partidoBean.partidoSeleccionado.fechaHoraUtc}">
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm" type="localDateTime"/>
+                    </h:outputText>
+                    &#183; #{partidoBean.partidoSeleccionado.nombreSede}
+                    &#183; #{partidoBean.partidoSeleccionado.nombreFase}
+                </div>
+
+                <div style="margin-bottom:1rem;">
+                    <h:panelGroup rendered="#{partidoBean.partidoSeleccionado.estado eq 'PROGRAMADO'}">
+                        <span class="badge-tag badge-gold">Programado</span>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{partidoBean.partidoSeleccionado.estado eq 'FINALIZADO'}">
+                        <span class="badge-tag badge-neutral">Finalizado</span>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{partidoBean.partidoSeleccionado.estado ne 'PROGRAMADO' and partidoBean.partidoSeleccionado.estado ne 'FINALIZADO'}">
+                        <span class="badge-tag badge-neutral">#{partidoBean.partidoSeleccionado.estado}</span>
+                    </h:panelGroup>
+                </div>
+
+                <h:panelGroup rendered="#{partidoBean.partidoSeleccionado.estado eq 'FINALIZADO'}">
+                    <p class="msg-warn">
+                        Este partido ya tiene un resultado registrado
+                        (#{partidoBean.partidoSeleccionado.golesLocal} - #{partidoBean.partidoSeleccionado.golesVisitante}).
+                        Confirmar lo va a sobreescribir.
+                    </p>
+                </h:panelGroup>
+
                 <h:form id="formResultado">
                     <div class="form-grid" style="grid-template-columns:1fr 1fr;">
                         <div class="form-group">
@@ -24,7 +60,8 @@
                             <h:inputText id="golesLocal"
                                          value="#{partidoBean.golesLocalForm}"
                                          required="true"
-                                         requiredMessage="Ingrese los goles del local.">
+                                         requiredMessage="Ingrese los goles del local."
+                                         p:type="number" p:min="0">
                                 <f:convertNumber integerOnly="true"/>
                             </h:inputText>
                             <h:message for="golesLocal" styleClass="msg-error"/>
@@ -35,7 +72,8 @@
                             <h:inputText id="golesVisitante"
                                          value="#{partidoBean.golesVisitanteForm}"
                                          required="true"
-                                         requiredMessage="Ingrese los goles del visitante.">
+                                         requiredMessage="Ingrese los goles del visitante."
+                                         p:type="number" p:min="0">
                                 <f:convertNumber integerOnly="true"/>
                             </h:inputText>
                             <h:message for="golesVisitante" styleClass="msg-error"/>

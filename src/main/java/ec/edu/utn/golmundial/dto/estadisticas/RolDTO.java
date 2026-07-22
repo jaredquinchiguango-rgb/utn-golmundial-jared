@@ -1,5 +1,8 @@
 package ec.edu.utn.golmundial.dto.estadisticas;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RolDTO {
 
     private Integer idRol;

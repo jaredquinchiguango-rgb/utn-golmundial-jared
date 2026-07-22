@@ -1,8 +1,10 @@
 package ec.edu.utn.golmundial.dto.estadisticas;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /** Mapea GET /api/sedes (confirmado por Ariel). */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SedeDTO {
 
     @JsonProperty("idVenue")

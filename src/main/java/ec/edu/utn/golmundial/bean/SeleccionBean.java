@@ -19,12 +19,15 @@ public class SeleccionBean implements Serializable {
 
     @Inject private SeleccionService seleccionService;
     @Inject private GrupoService     grupoService;
-    @Inject private LoginBean        loginBean; // para reenviar credenciales (Basic Auth)
+    @Inject private LoginBean        loginBean;
 
     private List<SeleccionDTO> selecciones;
     private List<GrupoDTO>     grupos;
     private SeleccionDTO       seleccionSeleccionada;
     private Integer            idGrupoSeleccionado;
+
+    // Bindeado por <f:viewParam name="id"> en selecciones/editar.xhtml
+    private Integer idSeleccionParam;
 
     @PostConstruct
     public void init() {
@@ -37,9 +40,27 @@ public class SeleccionBean implements Serializable {
     }
 
     public String prepararEditar(SeleccionDTO seleccion) {
-        seleccionSeleccionada = seleccion;
-        idGrupoSeleccionado = resolverIdGrupoPorNombre(seleccion.getNombreGrupo());
-        return "/selecciones/editar?faces-redirect=true";
+        return "/selecciones/editar?faces-redirect=true&id=" + seleccion.getIdSeleccion();
+    }
+
+    /** preRenderView de selecciones/editar.xhtml - busca la seleccion por idSeleccionParam. */
+    public void inicializarEdicion() {
+        if (FacesContext.getCurrentInstance().isPostback()) {
+            return;
+        }
+        if (idSeleccionParam == null) {
+            msg(FacesMessage.SEVERITY_ERROR, "No se especifico la seleccion.");
+            return;
+        }
+        seleccionSeleccionada = selecciones.stream()
+                .filter(s -> idSeleccionParam.equals(s.getIdSeleccion()))
+                .findFirst().orElse(null);
+
+        if (seleccionSeleccionada == null) {
+            msg(FacesMessage.SEVERITY_ERROR, "No se encontro la seleccion solicitada.");
+            return;
+        }
+        idGrupoSeleccionado = resolverIdGrupoPorNombre(seleccionSeleccionada.getNombreGrupo());
     }
 
     private Integer resolverIdGrupoPorNombre(String nombreGrupo) {
@@ -51,8 +72,10 @@ public class SeleccionBean implements Serializable {
     }
 
     public String guardarEdicion() {
-        // idConfederacion en null es seguro: el backend de Ariel no toca
-        // ese campo cuando llega null (confirmado en su codigo fuente).
+        if (seleccionSeleccionada == null) {
+            msg(FacesMessage.SEVERITY_ERROR, "No hay seleccion cargada para editar.");
+            return null;
+        }
         boolean exito = seleccionService.actualizar(seleccionSeleccionada, idGrupoSeleccionado, null,
                 loginBean.getCorreo(), loginBean.getClave());
         if (exito) {
@@ -65,7 +88,6 @@ public class SeleccionBean implements Serializable {
     }
 
     public String cancelar() {
-        seleccionSeleccionada = null;
         return "/selecciones/lista?faces-redirect=true";
     }
 
@@ -81,4 +103,7 @@ public class SeleccionBean implements Serializable {
 
     public Integer getIdGrupoSeleccionado()          { return idGrupoSeleccionado; }
     public void    setIdGrupoSeleccionado(Integer v) { this.idGrupoSeleccionado = v; }
+
+    public Integer getIdSeleccionParam()          { return idSeleccionParam; }
+    public void    setIdSeleccionParam(Integer v) { this.idSeleccionParam = v; }
 }

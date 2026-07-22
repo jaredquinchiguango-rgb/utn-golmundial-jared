@@ -1,6 +1,7 @@
 package ec.edu.utn.golmundial.dto.estadisticas;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * Mapea GET /api/selecciones (confirmado por Ariel).
@@ -11,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * en la lista de /api/grupos. Para idConfederation NO hay ningun
  * endpoint que lo entregue todavia - es un TODO pendiente con Ariel.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SeleccionDTO {
 
     @JsonProperty("idTeam")

@@ -34,6 +34,7 @@
                                 <th>P</th>
                                 <th>GF</th>
                                 <th>GC</th>
+                                <th>DG</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -55,6 +56,7 @@
                                     <td>#{s.partidosPerdidos}</td>
                                     <td>#{s.golesFavor}</td>
                                     <td>#{s.golesContra}</td>
+                                    <td>#{s.diferenciaGoles}</td>
                                     <td>
                                         <h:form style="display:inline">
                                             <h:commandButton value="Editar"
@@ -66,7 +68,7 @@
                             </ui:repeat>
                             <ui:fragment rendered="#{empty seleccionBean.selecciones}">
                                 <tr>
-                                    <td colspan="12" class="text-center text-muted">
+                                    <td colspan="13" class="text-center text-muted">
                                         No hay selecciones registradas.
                                     </td>
                                 </tr>

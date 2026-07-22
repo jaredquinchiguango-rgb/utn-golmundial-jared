@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
       xmlns:ui="jakarta.faces.facelets">
 
 <ui:composition template="/WEB-INF/templates/layout.xhtml">
 
     <ui:define name="titulo">Grupos</ui:define>
+    <ui:define name="eyebrow">Torneo</ui:define>
     <ui:define name="cabecera">Cat&#225;logo del torneo</ui:define>
 
     <ui:define name="contenido">
@@ -22,17 +24,24 @@
                 <div class="table-container">
                     <table>
                         <thead>
-                            <tr><th>Codigo</th><th>Nombre</th></tr>
+                            <tr><th>Codigo</th><th>Nombre</th><th>Acciones</th></tr>
                         </thead>
                         <tbody>
                             <ui:repeat value="#{grupoBean.grupos}" var="g">
                                 <tr>
                                     <td>#{g.codigo}</td>
                                     <td>#{g.nombre}</td>
+                                    <td>
+                                        <h:link outcome="/grupos/posiciones"
+                                                styleClass="btn btn-outline btn-sm">
+                                            <f:param name="id" value="#{g.idGrupo}"/>
+                                            Ver posiciones
+                                        </h:link>
+                                    </td>
                                 </tr>
                             </ui:repeat>
                             <ui:fragment rendered="#{empty grupoBean.grupos}">
-                                <tr><td colspan="2" class="text-center text-muted">No hay grupos registrados.</td></tr>
+                                <tr><td colspan="3" class="text-center text-muted">No hay grupos registrados.</td></tr>
                             </ui:fragment>
                         </tbody>
                     </table>

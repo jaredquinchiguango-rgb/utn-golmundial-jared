@@ -35,7 +35,6 @@ public class GrupoService {
         if (client != null) client.close();
     }
 
-    // TODO: confirmar path con Ariel (ej: /grupos)
     public List<GrupoDTO> listarTodos() {
         try {
             Response response = client
@@ -49,6 +48,25 @@ public class GrupoService {
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Error al listar grupos", e);
             return new ArrayList<>();
+        }
+    }
+
+    /** GET /grupos/{id}/posiciones (RF05) - ya viene ordenado por el backend. */
+    public GrupoDTO obtenerPosiciones(Integer idGrupo) {
+        try {
+            Response response = client
+                .target(ApiConfig.BASE_URL_ESTADISTICAS + "/grupos/" + idGrupo + "/posiciones")
+                .request(MediaType.APPLICATION_JSON)
+                .get();
+
+            if (response.getStatus() == 404) return null;
+
+            String json = response.readEntity(String.class);
+            return mapper.readValue(json, GrupoDTO.class);
+
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Error al obtener posiciones del grupo id=" + idGrupo, e);
+            return null;
         }
     }
 }

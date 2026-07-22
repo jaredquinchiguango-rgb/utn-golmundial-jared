@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /** Mapea GET /api/fases (confirmado por Ariel). */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class FaseDTO {
 
     @JsonProperty("idPhase")

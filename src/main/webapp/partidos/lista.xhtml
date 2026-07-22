@@ -44,7 +44,7 @@
                                     <td>#{p.nombreSeleccionVisitante}</td>
                                     <td>
                                         <h:outputText value="#{p.fechaHoraUtc}">
-                                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm" type="localDateTime"/>
                                         </h:outputText>
                                     </td>
                                     <td>#{p.nombreSede}</td>
