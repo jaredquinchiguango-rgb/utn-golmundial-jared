@@ -104,6 +104,34 @@
             </ui:fragment>
 
             <ui:fragment rendered="#{not loginBean.autenticado}">
+                <div class="auth-background" aria-hidden="true">
+                    <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice"
+     xmlns="http://www.w3.org/2000/svg">
+    <circle cx="220" cy="150" r="1.5" fill="#ffffff" opacity=".5"/>
+    <circle cx="1380" cy="110" r="1.5" fill="#ffffff" opacity=".4"/>
+    <circle cx="900" cy="60" r="1.2" fill="#ffffff" opacity=".35"/>
+    <circle cx="500" cy="220" r="1.2" fill="#ffffff" opacity=".3"/>
+    <circle cx="1150" cy="260" r="1.5" fill="#ffffff" opacity=".4"/>
+    <circle cx="80" cy="380" r="1.2" fill="#ffffff" opacity=".3"/>
+    <circle cx="1520" cy="340" r="1.2" fill="#ffffff" opacity=".3"/>
+    <circle cx="700" cy="130" r="1.2" fill="#ffffff" opacity=".25"/>
+
+    <polygon points="80,900 260,60 340,60 220,900" fill="#c99a3b" opacity=".05"/>
+    <polygon points="1520,900 1340,60 1260,60 1380,900" fill="#c99a3b" opacity=".05"/>
+    <polygon points="800,900 730,20 870,20 800,900" fill="#c99a3b" opacity=".04"/>
+
+    <rect x="256" y="30" width="8" height="60" fill="#2b3542"/>
+    <rect x="1336" y="30" width="8" height="60" fill="#2b3542"/>
+    <rect x="726" y="0" width="8" height="60" fill="#2b3542"/>
+
+    <path d="M -100 760 Q 800 560 1700 760 L 1700 900 L -100 900 Z" fill="#0d1319" opacity=".9"/>
+    <path d="M -100 800 Q 800 620 1700 800 L 1700 900 L -100 900 Z" fill="#0a0e13" opacity=".95"/>
+    <path d="M -100 840 Q 800 700 1700 840 L 1700 900 L -100 900 Z" fill="#070a0e"/>
+
+    <circle cx="800" cy="900" r="90" fill="none" stroke="#2f6b4f" stroke-width="2" opacity=".35"/>
+    <line x1="600" y1="900" x2="1000" y2="900" stroke="#2f6b4f" stroke-width="2" opacity=".35"/>
+</svg>
+                </div>
                 <header class="topbar topbar-auth">
                     <span class="brand-wordmark">GolMundial 2026 <span class="accent">&#183; Admin</span></span>
                 </header>
