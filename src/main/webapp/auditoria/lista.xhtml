@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">Auditoria</ui:define>
+    <ui:define name="eyebrow">Anal&#237;tica</ui:define>
+    <ui:define name="cabecera">Auditoria (RF24)</ui:define>
+
+    <ui:define name="acciones">
+        <h:form>
+            <h:commandButton value="Actualizar" styleClass="btn btn-outline"
+                             action="#{auditoriaBean.cargar()}"/>
+        </h:form>
+    </ui:define>
+
+    <ui:define name="contenido">
+        <div class="card">
+            <div class="card-header">Historial de acciones administrativas</div>
+            <div class="card-body">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fecha/Hora</th>
+                                <th>Accion</th>
+                                <th>Tabla afectada</th>
+                                <th>Usuario</th>
+                                <th>Descripcion</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <ui:repeat value="#{auditoriaBean.registros}" var="a">
+                                <tr>
+                                    <td>
+                                        <h:outputText value="#{a.fechaHora}">
+                                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" type="localDateTime"/>
+                                        </h:outputText>
+                                    </td>
+                                    <td><span class="badge-tag badge-neutral">#{a.tipoAccion}</span></td>
+                                    <td>#{a.tablaAfectada}</td>
+                                    <td>
+                                        #{a.nombreUsuario}
+                                        <div class="text-muted" style="font-size:.78rem;">#{a.emailUsuario}</div>
+                                    </td>
+                                    <td>#{a.descripcion}</td>
+                                </tr>
+                            </ui:repeat>
+                            <ui:fragment rendered="#{empty auditoriaBean.registros}">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">
+                                        No hay registros de auditoria todavia.
+                                    </td>
+                                </tr>
+                            </ui:fragment>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>
+</html>

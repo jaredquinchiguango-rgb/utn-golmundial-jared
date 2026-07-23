@@ -2,9 +2,8 @@ package ec.edu.utn.golmundial.service.estadisticas;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ec.edu.utn.golmundial.dto.estadisticas.AuditoriaDTO;
+import ec.edu.utn.golmundial.dto.estadisticas.RolDTO;
 import ec.edu.utn.golmundial.util.ApiConfig;
-import ec.edu.utn.golmundial.util.BasicAuthUtil;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -19,9 +18,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @ApplicationScoped
-public class AuditoriaService {
+public class RolService {
 
-    private static final Logger LOG = Logger.getLogger(AuditoriaService.class.getName());
+    private static final Logger LOG = Logger.getLogger(RolService.class.getName());
 
     private Client       client;
     private ObjectMapper mapper;
@@ -34,31 +33,25 @@ public class AuditoriaService {
                 .build();
         mapper = new ObjectMapper();
     }
- 
+
     @PreDestroy
     public void destroy() {
         if (client != null) client.close();
     }
 
-    /** GET /auditoria - EXIGE Basic Auth de administrador (confirmado: AuditLogResource). */
-    public List<AuditoriaDTO> listarTodas(String emailAdmin, String passwordAdmin) {
+    /** GET /roles - publico, no exige Basic Auth. */
+    public List<RolDTO> listarTodos() {
         try {
             Response response = client
-                .target(ApiConfig.BASE_URL_ESTADISTICAS + "/auditoria")
+                .target(ApiConfig.BASE_URL_ESTADISTICAS + "/roles")
                 .request(MediaType.APPLICATION_JSON)
-                .header("Authorization", BasicAuthUtil.buildHeader(emailAdmin, passwordAdmin))
                 .get();
 
-            if (response.getStatus() != 200) {
-                LOG.warning("GET /auditoria devolvio status " + response.getStatus());
-                return new ArrayList<>();
-            }
-
             String json = response.readEntity(String.class);
-            return mapper.readValue(json, new TypeReference<List<AuditoriaDTO>>() {});
+            return mapper.readValue(json, new TypeReference<List<RolDTO>>() {});
 
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Error al listar auditoria", e);
+            LOG.log(Level.SEVERE, "Error al listar roles", e);
             return new ArrayList<>();
         }
     }

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+
+    <f:metadata>
+        <f:viewParam name="id" value="#{usuarioBean.idUsuarioParam}"/>
+        <f:event type="preRenderView" listener="#{usuarioBean.inicializarFormulario}"/>
+    </f:metadata>
+
+    <ui:define name="titulo">#{usuarioBean.esEdicion ? 'Editar usuario' : 'Nuevo usuario'}</ui:define>
+    <ui:define name="eyebrow">Cuentas</ui:define>
+    <ui:define name="cabecera">#{usuarioBean.esEdicion ? 'Editar usuario' : 'Nuevo usuario'}</ui:define>
+
+    <ui:define name="contenido">
+        <div class="card" style="max-width:520px;margin:0 auto;">
+            <div class="card-header">
+                #{usuarioBean.esEdicion ? usuarioBean.nombreForm : 'Datos de la nueva cuenta'}
+            </div>
+            <div class="card-body">
+                <h:form id="formUsuario">
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <h:outputLabel for="nombre" value="Nombre *"/>
+                            <h:inputText id="nombre" value="#{usuarioBean.nombreForm}"
+                                         required="true" requiredMessage="El nombre es obligatorio."/>
+                            <h:message for="nombre" styleClass="msg-error"/>
+                        </div>
+                        <div class="form-group">
+                            <h:outputLabel for="email" value="Email *"/>
+                            <h:inputText id="email" value="#{usuarioBean.emailForm}"
+                                         required="true" requiredMessage="El email es obligatorio."/>
+                            <h:message for="email" styleClass="msg-error"/>
+                        </div>
+
+                        <h:panelGroup rendered="#{not usuarioBean.esEdicion}">
+                            <div class="form-group">
+                                <h:outputLabel for="username" value="Username *"/>
+                                <h:inputText id="username" value="#{usuarioBean.usernameForm}"
+                                             required="#{not usuarioBean.esEdicion}"
+                                             requiredMessage="El username es obligatorio."/>
+                                <h:message for="username" styleClass="msg-error"/>
+                            </div>
+                        </h:panelGroup>
+
+                        <h:panelGroup rendered="#{usuarioBean.esEdicion}">
+                            <div class="form-group">
+                                <h:outputLabel for="rol" value="Rol"/>
+                                <h:selectOneMenu id="rol" value="#{usuarioBean.idRolForm}">
+                                    <f:selectItems value="#{usuarioBean.rolesAsignables}" var="r"
+                                                   itemValue="#{r.idRol}"
+                                                   itemLabel="#{r.nombre eq 'USUARIO' ? 'USUARIO REGISTRADO' : r.nombre}"/>
+                                </h:selectOneMenu>
+                            </div>
+                            <div class="form-group">
+                                <h:outputLabel for="activo" value="Cuenta activa"/>
+                                <h:selectBooleanCheckbox id="activo" value="#{usuarioBean.activoForm}"/>
+                            </div>
+                        </h:panelGroup>
+
+                        <div class="form-group full-width">
+                            <h:outputLabel for="clave"
+                                value="#{usuarioBean.esEdicion ? 'Nueva clave (dejar en blanco para no cambiarla)' : 'Clave *'}"/>
+                            <h:inputSecret id="clave" value="#{usuarioBean.claveForm}"
+                                           redisplay="false"
+                                           required="#{not usuarioBean.esEdicion}"
+                                           requiredMessage="La clave es obligatoria."/>
+                            <h:message for="clave" styleClass="msg-error"/>
+                        </div>
+                    </div>
+
+                    <h:panelGroup rendered="#{not usuarioBean.esEdicion}">
+                        <p class="text-muted mt-2">
+                            Las cuentas nuevas siempre quedan con rol "usuario" y activas
+                            (asi lo define el backend). Si necesita otro rol, guarde primero
+                            y luego edite la cuenta para asignarselo.
+                        </p>
+                    </h:panelGroup>
+
+                    <div class="form-actions">
+                        <h:commandButton value="Cancelar"
+                                         styleClass="btn btn-outline"
+                                         action="#{usuarioBean.cancelar()}"
+                                         immediate="true"/>
+                        <h:commandButton value="Guardar"
+                                         styleClass="btn btn-primary"
+                                         action="#{usuarioBean.guardar()}"/>
+                    </div>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>
+</html>

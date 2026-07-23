@@ -29,7 +29,7 @@ public class LoginBean implements Serializable {
             return null;
         }
 
-        if (!"ADMINISTRADOR".equals(usuario.getNombreRol())) {
+        if (usuario.getNombreRol() == null || !"ADMINISTRADOR".equalsIgnoreCase(usuario.getNombreRol().trim())) {
             clave = null;
             msg(FacesMessage.SEVERITY_ERROR,
                 "Esta cuenta no tiene permisos de administrador para acceder a este panel.");
